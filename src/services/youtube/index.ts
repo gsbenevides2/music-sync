@@ -15,8 +15,10 @@ interface Config {
   value2?: string
 }
 
-const { YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, YOUTUBE_REDIRECT_URL } =
+const { YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, WEB_CLIENT_HOST } =
   process.env
+
+const YOUTUBE_REDIRECT_URL = WEB_CLIENT_HOST + '/youtubeAuth/callback'
 
 export class YoutubeService {
   private oauthClient = new google.auth.OAuth2(

@@ -6,8 +6,10 @@ import { compare, encrypt } from '../../utils/cripto'
 import { InvalidGithubUser, SessionNotFound, TokenInvalid } from './errors'
 import { Session } from './types'
 
-const { GITHUB_CLIENT_ID, GITHUB_SECRET, GITHUB_LOGIN, GITHUB_REDIRECT } =
-  process.env
+const { GITHUB_CLIENT_ID, GITHUB_SECRET, WEB_CLIENT_HOST } = process.env
+
+const GITHUB_LOGIN = 'gsbenevides2'
+const GITHUB_REDIRECT = WEB_CLIENT_HOST + '/authCallback'
 
 export class AuthModel {
   authUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user&login=${GITHUB_LOGIN}`

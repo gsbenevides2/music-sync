@@ -51,6 +51,7 @@
     "mysql": "^2.18.1",
     "node-id3": "^0.2.3",
     "node-youtube-music": "^0.3.6",
+    "pg": "^8.7.1",
     "socket.io": "^4.2.0",
     "spotify-url-info": "^2.2.3",
     "spotify-web-api-node": "^5.0.2",

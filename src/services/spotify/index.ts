@@ -15,8 +15,10 @@ interface AuthorizationCodeGrantResponse {
   token_type: string
 }
 
-const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URL } =
+const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, WEB_CLIENT_HOST } =
   process.env
+
+const SPOTIFY_REDIRECT_URL = WEB_CLIENT_HOST + '/spotifyAuth/callback'
 
 interface MusicData {
   name: string
