@@ -28,7 +28,13 @@ export function useAudioEvents(
       })
     }
     */
-
+    audio.current.addEventListener(
+      'error',
+      e => {
+        console.log(e)
+      },
+      options
+    )
     audio.current.addEventListener(
       'play',
       () => {

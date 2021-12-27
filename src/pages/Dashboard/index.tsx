@@ -20,6 +20,7 @@ const DashboardScreen: React.FC = () => {
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const playerContext = React.useContext(PlayerContext)
   const musicListContext = React.useContext(MusicListContext)
+  
   const showMessage = useMessage()
 
   React.useEffect(() => {

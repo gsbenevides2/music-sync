@@ -3,6 +3,7 @@ import React from 'react'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
 import { MusicListContext } from '../MusicList'
 import { useAudioEvents } from './hooks/useAudioEvents'
+import { useKeyboardToHandleEvents } from './hooks/useKeyboardToHandleEvents'
 import { useMediaSessionHandlers } from './hooks/useMediaSessionHandlers'
 import { useMediaSessionMetadata } from './hooks/useMediaSessionMetadata'
 import { useNextMusic } from './hooks/useNextMusic'
@@ -37,7 +38,7 @@ export const PlayerContextProvider: React.FC = ({ children }) => {
   const [currentTime, setCurrentTime] = React.useState(0)
   const [waiting, setWaiting] = React.useState(false)
 
-  const playMusic = usePlayMusic(audio, setActualMusic,setWaiting)
+  const playMusic = usePlayMusic(audio, setActualMusic, setWaiting)
   const nextMusic = useNextMusic(
     musicListContext?.musicList || [],
     actualMusic,
@@ -60,6 +61,7 @@ export const PlayerContextProvider: React.FC = ({ children }) => {
     setWaiting
   )
   useMediaSessionHandlers(audio, nextMusic, previousMusic, setPosition)
+  useKeyboardToHandleEvents(audio, actualMusic)
   useMediaSessionMetadata(actualMusic)
 
   return (
