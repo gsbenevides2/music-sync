@@ -26,7 +26,6 @@ const DashboardScreen: React.FC = () => {
     function start(page: number) {
       fetchMusicsWithArtistAndAlbum(page)
         .then(musicsFetched => {
-          console.log(musicsFetched)
           setPageState('Loaded')
           setMusics(musics => {
             if (musics) return [...musics, ...musicsFetched]
@@ -35,7 +34,6 @@ const DashboardScreen: React.FC = () => {
           if (musicsFetched.length === 10) start(page + 1)
         })
         .catch(e => {
-          console.log(e.code || e.response)
           if (e.code) {
             if (e.code === 'Offline') setPageState('Offline')
             else if (e.code === 'NotMoreError') setPageState('Loaded')
