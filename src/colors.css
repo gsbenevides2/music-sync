@@ -1,0 +1,227 @@
+:root {
+  --app-color-50: #eef2ff;
+  --app-color-100: #e0e7ff;
+  --app-color-200: #c7d2fe;
+  --app-color-300: #a5b4fc;
+  --app-color-400: #818cf8;
+  --app-color-500: #6366f1;
+  --app-color-600: #4f46e5;
+  --app-color-700: #4338ca;
+  --app-color-800: #3730a3;
+  --app-color-900: #312e81;
+}
+
+.bg-app-50 {
+  background-color: var(--app-color-50);
+}
+
+.hover\:bg-app-50:hover {
+  background-color: var(--app-color-50);
+}
+.text-app-50 {
+  color: var(--app-color-50);
+}
+
+.hover\:text-app-50:hover {
+  color: var(--app-color-50);
+}
+.border-app-50 {
+  border-color: var(--app-color-50);
+}
+
+.hover\:border-app-50:hover {
+  border-color: var(--app-color-50);
+}
+.bg-app-100 {
+  background-color: var(--app-color-100);
+}
+
+.hover\:bg-app-100:hover {
+  background-color: var(--app-color-100);
+}
+.text-app-100 {
+  color: var(--app-color-100);
+}
+
+.hover\:text-app-100:hover {
+  color: var(--app-color-100);
+}
+.border-app-100 {
+  border-color: var(--app-color-100);
+}
+
+.hover\:border-app-100:hover {
+  border-color: var(--app-color-100);
+}
+.bg-app-200 {
+  background-color: var(--app-color-200);
+}
+
+.hover\:bg-app-200:hover {
+  background-color: var(--app-color-200);
+}
+.text-app-200 {
+  color: var(--app-color-200);
+}
+
+.hover\:text-app-200:hover {
+  color: var(--app-color-200);
+}
+.border-app-200 {
+  border-color: var(--app-color-200);
+}
+
+.hover\:border-app-200:hover {
+  border-color: var(--app-color-200);
+}
+.bg-app-300 {
+  background-color: var(--app-color-300);
+}
+
+.hover\:bg-app-300:hover {
+  background-color: var(--app-color-300);
+}
+.text-app-300 {
+  color: var(--app-color-300);
+}
+
+.hover\:text-app-300:hover {
+  color: var(--app-color-300);
+}
+.border-app-300 {
+  border-color: var(--app-color-300);
+}
+
+.hover\:border-app-300:hover {
+  border-color: var(--app-color-300);
+}
+.bg-app-400 {
+  background-color: var(--app-color-400);
+}
+
+.hover\:bg-app-400:hover {
+  background-color: var(--app-color-400);
+}
+.text-app-400 {
+  color: var(--app-color-400);
+}
+
+.hover\:text-app-400:hover {
+  color: var(--app-color-400);
+}
+.border-app-400 {
+  border-color: var(--app-color-400);
+}
+
+.hover\:border-app-400:hover {
+  border-color: var(--app-color-400);
+}
+.bg-app-500 {
+  background-color: var(--app-color-500);
+}
+
+.hover\:bg-app-500:hover {
+  background-color: var(--app-color-500);
+}
+.text-app-500 {
+  color: var(--app-color-500);
+}
+
+.hover\:text-app-500:hover {
+  color: var(--app-color-500);
+}
+.border-app-500 {
+  border-color: var(--app-color-500);
+}
+
+.hover\:border-app-500:hover {
+  border-color: var(--app-color-500);
+}
+.bg-app-600 {
+  background-color: var(--app-color-600);
+}
+
+.hover\:bg-app-600:hover {
+  background-color: var(--app-color-600);
+}
+.text-app-600 {
+  color: var(--app-color-600);
+}
+
+.hover\:text-app-600:hover {
+  color: var(--app-color-600);
+}
+.border-app-600 {
+  border-color: var(--app-color-600);
+}
+
+.hover\:border-app-600:hover {
+  border-color: var(--app-color-600);
+}
+.bg-app-700 {
+  background-color: var(--app-color-700);
+}
+
+.hover\:bg-app-700:hover {
+  background-color: var(--app-color-700);
+}
+.text-app-700 {
+  color: var(--app-color-700);
+}
+
+.hover\:text-app-700:hover {
+  color: var(--app-color-700);
+}
+.border-app-700 {
+  border-color: var(--app-color-700);
+}
+
+.hover\:border-app-700:hover {
+  border-color: var(--app-color-700);
+}
+.bg-app-800 {
+  background-color: var(--app-color-800);
+}
+
+.hover\:bg-app-800:hover {
+  background-color: var(--app-color-800);
+}
+.text-app-800 {
+  color: var(--app-color-800);
+}
+
+.hover\:text-app-800:hover {
+  color: var(--app-color-800);
+}
+.border-app-800 {
+  border-color: var(--app-color-800);
+}
+
+.hover\:border-app-800:hover {
+  border-color: var(--app-color-800);
+}
+.bg-app-900 {
+  background-color: var(--app-color-900);
+}
+
+.hover\:bg-app-900:hover {
+  background-color: var(--app-color-900);
+}
+.text-app-900 {
+  color: var(--app-color-900);
+}
+
+.hover\:text-app-900:hover {
+  color: var(--app-color-900);
+}
+.border-app-900 {
+  border-color: var(--app-color-900);
+}
+
+.hover\:border-app-900:hover {
+  border-color: var(--app-color-900);
+}
+
+.special-fill {
+  fill: var(--app-color-600) !important;
+}
