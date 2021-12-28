@@ -38,7 +38,12 @@ const AlbumsScreen: React.FC = () => {
             else if (e.code === 'NotMoreError') setPageState('Loaded')
             else setPageState('Error')
           } else if (e.response?.data?.code) {
-            if (page === 0 && e.response?.data?.code === 'NotFoundAlbums')
+            if (
+              e.response.data.code === 'SessionNotFound' ||
+              e.response.data.code === 'TokenInvalid'
+            )
+              showMessage(e.response.data.code)
+            else if (page === 0 && e.response?.data?.code === 'NotFoundAlbums')
               setPageState('Empty')
             else if (page > 0) showMessage('NotLoadAllAlbums')
             else setPageState('Error')

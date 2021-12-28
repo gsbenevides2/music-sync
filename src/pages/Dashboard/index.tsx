@@ -42,7 +42,12 @@ const DashboardScreen: React.FC = () => {
             else if (e.code === 'NotMoreError') setPageState('Loaded')
             else setPageState('Error')
           } else if (e.response?.data?.code) {
-            if (page === 0 && e.response?.data?.code === 'NotFoundMusics')
+            if (
+              e.response.data.code === 'SessionNotFound' ||
+              e.response.data.code === 'TokenInvalid'
+            )
+              showMessage(e.response.data.code)
+            else if (page === 0 && e.response?.data?.code === 'NotFoundMusics')
               setPageState('Empty')
             else if (page > 0) showMessage('NotLoadAllMusics')
             else setPageState('Error')
