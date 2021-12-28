@@ -12,6 +12,7 @@ import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
 import { setAppColor } from '../../utils/colorsTools/setAppColor'
 import CircleButton from '../CircleButton'
+import MediumList from '../MeddiumList'
 import { PlayAndPauseMemoButton } from './playAndPauseButton'
 import { ProgressMemo } from './progress'
 import { TooglePlaylistMemoButton } from './tooglePlaylistButton'
@@ -132,34 +133,26 @@ const Player: React.FC = () => {
             </div>
           </div>
           <h2 className="p-2">Lista de Reprodução Atual:</h2>
-          <ul
-            className="overflow-y-scroll"
-            style={{
+          <MediumList
+            listOfItems={musicListContext.musicList.map(music => {
+              return {
+                id: music.id,
+                title: music.name,
+                imageSrc: music.album.spotifyCoverUrl,
+                subtitle: music.artist.name
+              }
+            })}
+            ulClassName="overflow-y-scroll"
+            ulStyle={{
               height: `calc(100vh - ${playerHeight + 40}px)`
             }}
-          >
-            {musicListContext.musicList.map(music => (
-              <li
-                key={music.id}
-                className="flex justify-between hover-black pointer p-2 "
-                onClick={() => {
-                  playerContext.playMusic(music)
-                }}
-              >
-                <div className="flex">
-                  <img
-                    src={music.album.spotifyCoverUrl}
-                    style={{ height: 'calc(10vh)' }}
-                  />
-                  <div className="flex flex-col m-1">
-                    <span>{music.name}</span>
-                    <span className="text-sm">{music.artist.name}</span>
-                  </div>
-                </div>
-                <div className="self-center grid grid-cols-4 gap-1 pr-4"></div>
-              </li>
-            ))}
-          </ul>
+            onClick={musicId => {
+              const music = musicListContext.musicList.find(
+                music => music.id === musicId
+              )
+              if (music) playerContext.playMusic(music)
+            }}
+          />
         </>
       ) : (
         <p className="w-full text-center">Não está tocando nada!</p>
