@@ -61,7 +61,7 @@ export const PlayerContextProvider: React.FC = ({ children }) => {
     setWaiting
   )
   useMediaSessionHandlers(audio, nextMusic, previousMusic, setPosition)
-  useKeyboardToHandleEvents(audio, actualMusic)
+  useKeyboardToHandleEvents(audio, actualMusic, previousMusic, nextMusic)
   useMediaSessionMetadata(actualMusic)
 
   return (
