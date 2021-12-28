@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import path from 'path'
-import { playMiddleware } from '../middleware/play'
 
+import { playMiddleware } from '../middleware/play'
 import { MusicsModel } from '../models/musics'
 import { NotFoundMusic, NotFoundMusics } from '../models/musics/errors'
 import { AppError, UnknownError } from '../utils/error'
@@ -113,7 +113,62 @@ export class MusicsController {
     const musicId = req.params.id
     res.download(path.resolve(process.cwd(), 'temp', `${musicId}.mp3`))
   }
+
   play(req: Request, res: Response) {
     playMiddleware(req, res)
+  }
+
+  async album(req: Request, res: Response) {
+    const withAlbum = (req.query.withAlbum as boolean | undefined) || false
+    const withArtist = (req.query.withArtist as boolean | undefined) || false
+    const pag = Number(req.query.pag as string | undefined) || 0
+
+    const albumId = req.params.id as string
+
+    musicsModel
+      .getByAlbum(albumId, withAlbum, withArtist, pag)
+      .then(musics => {
+        if (musics.length) res.json(musics)
+        else {
+          const error = new NotFoundMusics()
+          res.status(error.status).json(error.toJson())
+        }
+      })
+      .catch(error => {
+        console.log(error)
+        if (error instanceof AppError) {
+          res.status(error.status).json(error.toJson())
+        } else {
+          const unknownError = new UnknownError()
+          res.status(unknownError.status).json(unknownError.toJson())
+        }
+      })
+  }
+
+  async artist(req: Request, res: Response) {
+    const withAlbum = (req.query.withAlbum as boolean | undefined) || false
+    const withArtist = (req.query.withArtist as boolean | undefined) || false
+    const pag = Number(req.query.pag as string | undefined) || 0
+
+    const artistId = req.params.id as string
+
+    musicsModel
+      .getByArtist(artistId, withAlbum, withArtist, pag)
+      .then(musics => {
+        if (musics.length) res.json(musics)
+        else {
+          const error = new NotFoundMusics()
+          res.status(error.status).json(error.toJson())
+        }
+      })
+      .catch(error => {
+        console.log(error)
+        if (error instanceof AppError) {
+          res.status(error.status).json(error.toJson())
+        } else {
+          const unknownError = new UnknownError()
+          res.status(unknownError.status).json(unknownError.toJson())
+        }
+      })
   }
 }

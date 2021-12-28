@@ -21,6 +21,11 @@ export class ArtistsModel {
       .limit(10)) as Artist[]
   }
 
+  async exists(artistId: string) {
+    const result = await db('artists').select('*').where('id', artistId)
+    return result.length === 1
+  }
+
   async findBySpotifyIdReturnOnlyId(spotifyId: string) {
     return (await db('artists')
       .select('id')

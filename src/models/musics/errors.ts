@@ -43,3 +43,14 @@ export class NotFoundMusic extends AppError {
     super('NotFoundMusic', 'Not Found Music', 404)
   }
 }
+export class AlbumNotExists extends AppError {
+  constructor() {
+    super('AlbumNotExists', 'Album Not Found', 404)
+  }
+}
+
+export class ArtistNotExists extends AppError {
+  constructor() {
+    super('ArtistNotExists', 'Artist Not Found', 404)
+  }
+}

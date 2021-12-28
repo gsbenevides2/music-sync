@@ -51,4 +51,21 @@ musicsRoutes.post(
   musicsValidation.create,
   musicsController.create
 )
+
+musicsRoutes.get(
+  '/album/:id/musics',
+  authValidantion.authenticate,
+  authController.authenticate,
+  musicsValidation.album,
+  musicsController.album
+)
+
+musicsRoutes.get(
+  '/artist/:id/musics',
+  authValidantion.authenticate,
+  authController.authenticate,
+  musicsValidation.artist,
+  musicsController.artist
+)
+
 export { musicsRoutes }

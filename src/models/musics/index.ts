@@ -5,7 +5,12 @@ import { SpotifyService } from '../../services/spotify'
 import { YoutubeService } from '../../services/youtube'
 import { AlbumsModel } from '../albums'
 import { ArtistsModel } from '../artists'
-import { MusicAlreadyExists, SelectYoutubeMusic } from './errors'
+import {
+  AlbumNotExists,
+  ArtistNotExists,
+  MusicAlreadyExists,
+  SelectYoutubeMusic
+} from './errors'
 import { Music, MusicList } from './types'
 
 const artistsModel = new ArtistsModel()
@@ -203,5 +208,43 @@ export class MusicsModel {
 
   async getOnlyColumns(id: string, columns: Array<keyof Music>) {
     return await db<Music>('musics').select(columns).where('id', id).first()
+  }
+
+  async getByAlbum(
+    albumId: string,
+    withAlbum: boolean,
+    withArtist: boolean,
+    pag: number
+  ) {
+    const albumsExists = await albumsModel.exists(albumId)
+    if (!albumsExists) throw new AlbumNotExists()
+    const { query, rowManager } = useOptionalData(withAlbum, withArtist)
+
+    query.where('musics.albumId', '=', albumId)
+    query.offset(pag * 10)
+    query.orderBy('musics.name', 'asc')
+    query.limit(10)
+
+    const rows = await query
+    return rows.map(rowManager)
+  }
+
+  async getByArtist(
+    artistId: string,
+    withAlbum: boolean,
+    withArtist: boolean,
+    pag: number
+  ) {
+    const artistsExists = await artistsModel.exists(artistId)
+    if (!artistsExists) throw new ArtistNotExists()
+    const { query, rowManager } = useOptionalData(withAlbum, withArtist)
+
+    query.where('musics.artistId', '=', artistId)
+    query.offset(pag * 10)
+    query.orderBy('musics.name', 'asc')
+    query.limit(10)
+
+    const rows = await query
+    return rows.map(rowManager)
   }
 }
