@@ -14,6 +14,7 @@ const GITHUB_REDIRECT = WEB_CLIENT_HOST + '/authCallback'
 export class AuthModel {
   authUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user&login=${GITHUB_LOGIN}`
   async authCallback(code: string) {
+    console.log(GITHUB_REDIRECT)
     const { data: githubAuthData } = await axios({
       url: 'https://github.com/login/oauth/access_token',
       params: {
@@ -27,6 +28,7 @@ export class AuthModel {
         Accept: 'application/json'
       }
     })
+   
 
     const { data: githubUserData } = await axios({
       method: 'get',
