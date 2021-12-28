@@ -7,10 +7,12 @@ import Modal from '../../components/Modal'
 import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
-import { fetchMusicsWithArtistAndAlbum } from '../../services/api/fetchMusicsWithArtistAndAlbum'
-import { ReactComponent as HappyMusic } from '../../undraw/happy_music.svg'
-import { ReactComponent as ServerDown } from '../../undraw/server_down.svg'
-import { ReactComponent as SignalSearching } from '../../undraw/signal_searching.svg'
+import { fetchMusicsWithArtistAndAlbum } from '../../services/api/fetchs/musicsWithArtistAndAlbum'
+import { EmptyState } from './emptyState'
+import { ErrorState } from './errorState'
+import { LoadingState } from './loadingState'
+import { OfflineState } from './offlineState'
+
 // import { MusicsResponse } from '../../services/api.types'
 
 type PageState = 'Loading' | 'Empty' | 'Error' | 'Loaded' | 'Offline'
@@ -20,11 +22,11 @@ const DashboardScreen: React.FC = () => {
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const playerContext = React.useContext(PlayerContext)
   const musicListContext = React.useContext(MusicListContext)
-  
+
   const showMessage = useMessage()
 
   React.useEffect(() => {
-    function start(page: number) {
+    function loadMusics(page: number) {
       fetchMusicsWithArtistAndAlbum(page)
         .then(musicsFetched => {
           setPageState('Loaded')
@@ -32,7 +34,7 @@ const DashboardScreen: React.FC = () => {
             if (musics) return [...musics, ...musicsFetched]
             else return musicsFetched
           })
-          if (musicsFetched.length === 10) start(page + 1)
+          if (musicsFetched.length === 10) loadMusics(page + 1)
         })
         .catch(e => {
           if (e.code) {
@@ -47,8 +49,9 @@ const DashboardScreen: React.FC = () => {
           } else setPageState('Error')
         })
     }
-    start(0)
+    loadMusics(0)
   }, [])
+
   const musicCallback = React.useCallback(
     (id: string) => {
       const music = musics.find(music => music.id === id)
@@ -58,46 +61,13 @@ const DashboardScreen: React.FC = () => {
     },
     [musics]
   )
+
   let Content
-  if (pageState === 'Loading') {
-    Content = (
-      <div className="flex flex-col items-center mt-3">
-        <div className="loader"></div>
-        <h1 className="max-w-xl text-center text-2xl">Aguarde</h1>
-      </div>
-    )
-  } else if (pageState === 'Offline') {
-    Content = (
-      <div className="flex flex-col items-center mt-3">
-        <SignalSearching className="w-80 h-80" />
-        <h1 className="max-w-xl text-center text-2xl">
-          Você está sem internet!
-        </h1>
-      </div>
-    )
-  } else if (pageState === 'Empty') {
-    Content = (
-      <div className="flex flex-col items-center mt-3">
-        <HappyMusic className="w-80 h-80" />
-        <h1 className="max-w-xl text-center text-2xl">
-          Você ainda não adicionou músicas.
-          <br />
-          Tente ir nas configurações!
-        </h1>
-      </div>
-    )
-  } else if (pageState === 'Error') {
-    Content = (
-      <div className="flex flex-col items-center mt-3">
-        <ServerDown className="w-80 h-80" />
-        <h1 className="max-w-xl text-center text-2xl">
-          Ocorreu um erro inesperado!
-          <br />
-          Tente novamente mais tarde.
-        </h1>
-      </div>
-    )
-  } else if (pageState === 'Loaded') {
+  if (pageState === 'Loading') Content = <LoadingState />
+  else if (pageState === 'Offline') Content = <OfflineState />
+  else if (pageState === 'Empty') Content = <EmptyState />
+  else if (pageState === 'Error') Content = <ErrorState />
+  else if (pageState === 'Loaded') {
     Content = (
       <>
         <LaggerList

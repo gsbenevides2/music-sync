@@ -35,6 +35,14 @@ export const messages = {
   NotLoadAllMusics: {
     type: 'error',
     text: 'Não foi possivel carregar todas as músicas!'
+  },
+  NotLoadAllAlbums: {
+    type: 'error',
+    text: 'Não foi possivel carregar todas os albums!'
+  },
+  NotLoadAllArtists: {
+    type: 'error',
+    text: 'Não foi possivel carregar todas os artistas!'
   }
 }
 

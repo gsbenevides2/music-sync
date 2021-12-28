@@ -1,23 +1,7 @@
-import { DatabaseManager } from '../database/database'
-import api from './api'
-import { Album, Artist, Music, MusicWithArtistAndAlbum } from './apiTypes'
-
-class OfflineError extends Error {
-  code = 'Offline'
-}
-
-class NotMoreError extends Error {
-  code = 'NotMoreError'
-}
-
-function networkTest() {
-  return new Promise<'api' | 'db'>((resolve, reject) => {
-    const offline = localStorage.getItem('offline')
-    if (navigator.onLine === true) resolve('api')
-    else if (offline === 'true') resolve('db')
-    else reject(new OfflineError())
-  })
-}
+import { DatabaseManager } from '../../database/database'
+import api from '../api'
+import { Album, Artist, Music, MusicWithArtistAndAlbum } from '../apiTypes'
+import { networkTest, NotMoreError } from './utils'
 
 function fetchMusicsFromApi(page: number) {
   return new Promise<MusicWithArtistAndAlbum[]>((resolve, reject) => {

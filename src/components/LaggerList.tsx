@@ -3,7 +3,7 @@ import React from 'react'
 export interface LaggerListItem {
   id: string
   title: string
-  subtitle: string
+  subtitle?: string
   imageSrc: string
 }
 
@@ -26,7 +26,11 @@ const LaggerList: React.FC<Props> = props => {
           <p className="break-words overflow-hidden" style={{ height: 46 }}>
             {item.title}
           </p>
-          <p className="text-sm truncate">{item.subtitle}</p>
+          {item.subtitle ? (
+            <p className="text-sm truncate">{item.subtitle}</p>
+          ) : (
+            <></>
+          )}
         </li>
       ))}
     </ul>
