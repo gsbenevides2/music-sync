@@ -1,8 +1,13 @@
 import { Request, Response } from 'express'
 import ytdl from 'ytdl-core'
+
 import { AppError } from '../utils/error'
 
-const DownloadError = new AppError('DownloadError','Error ind download music',500)
+const DownloadError = new AppError(
+  'DownloadError',
+  'Error ind download music',
+  500
+)
 
 export function playMiddleware(req: Request, res: Response) {
   const youtubeId = req.query.ytId as string
@@ -24,11 +29,12 @@ export function playMiddleware(req: Request, res: Response) {
       reqY.pipe(res)
     }
   })
-  reqY.on('end',()=>{
+  reqY.on('end', () => {
     console.log('play end')
-    res.end()})
-  reqY.on('error',(e)=>{
-    console.log('play error',e)
+    res.end()
+  })
+  reqY.on('error', e => {
+    console.log('play error', e)
     res.send(DownloadError.status).json(DownloadError.toJson())
   })
   // reqY.pipe(res)
