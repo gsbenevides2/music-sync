@@ -57,6 +57,8 @@ const Player: React.FC = () => {
         height: `${window.innerHeight}px`
       })
     } else if (playerContext.actualMusic) {
+      const r = document.querySelector(':root') as any
+      r.style.setProperty(`--player-height`, `${playerHeight}px`)
       animationApiToOpenAndClosePlayer.start({
         height: `${playerHeight}px`
       })

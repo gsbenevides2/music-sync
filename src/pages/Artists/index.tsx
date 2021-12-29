@@ -5,6 +5,7 @@ import { useHistory } from 'react-router-dom'
 import LaggerList from '../../components/LaggerList'
 import { useMessage } from '../../components/Message/index.'
 import Modal from '../../components/Modal'
+import { ScreenContainer } from '../../components/ScreenContainer'
 import { Artist } from '../../services/api/apiTypes'
 import { fetchArtists } from '../../services/api/fetchs/artists'
 import { ErrorState } from '../Dashboard/errorState'
@@ -63,31 +64,29 @@ const ArtistsScreen: React.FC = () => {
   else if (pageState === 'Error') Content = <ErrorState />
   else if (pageState === 'Loaded') {
     Content = (
-      <>
-        <LaggerList
-          listOfItems={artists.map(album => {
-            return {
-              id: album.id,
-              title: album.name,
-              imageSrc: album.spotifyCoverUrl
-            }
-          })}
-          onClick={artistCallback}
-        />
-        <p style={{ height: '12vh' }} />
-      </>
+
+      <LaggerList
+        listOfItems={artists.map(album => {
+          return {
+            id: album.id,
+            title: album.name,
+            imageSrc: album.spotifyCoverUrl
+          }
+        })}
+        onClick={artistCallback}
+      />
     )
   }
 
   return (
-    <div>
+    <ScreenContainer>
       <Helmet>
         <title>Music Sync - Todos os Artistas</title>
       </Helmet>
       <Modal />
       <br />
       {Content}
-    </div>
+    </ScreenContainer>
   )
 }
 

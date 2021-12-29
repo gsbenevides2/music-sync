@@ -19,7 +19,7 @@ const DashboardLayout: React.FC = props => {
   return (
     <MusicListContextProvider>
       <PlayerContextProvider>
-        <div className="p-3">
+        <div className="">
           <Header title="Um Titulo" />
           {props.children}
           <Player />

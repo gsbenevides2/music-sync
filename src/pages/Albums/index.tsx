@@ -5,6 +5,7 @@ import { useHistory } from 'react-router-dom'
 import LaggerList from '../../components/LaggerList'
 import { useMessage } from '../../components/Message/index.'
 import Modal from '../../components/Modal'
+import { ScreenContainer } from '../../components/ScreenContainer'
 import { Album } from '../../services/api/apiTypes'
 import { fetchAlbums } from '../../services/api/fetchs/albums'
 import { ErrorState } from '../Dashboard/errorState'
@@ -43,7 +44,7 @@ const AlbumsScreen: React.FC = () => {
           else if (page === 0 && code === 'NotFoundAlbums')
             setPageState('Empty')
           else if (page > 0 && code !== 'NotFoundAlbums') showMessage('NotLoadAllAlbums')
-          else if(page>0 && code === 'NotFoundAlbums') setPageState('Loaded')
+          else if (page > 0 && code === 'NotFoundAlbums') setPageState('Loaded')
           else setPageState('Error')
         })
     }
@@ -64,31 +65,28 @@ const AlbumsScreen: React.FC = () => {
   else if (pageState === 'Error') Content = <ErrorState />
   else if (pageState === 'Loaded') {
     Content = (
-      <>
-        <LaggerList
-          listOfItems={albums.map(album => {
-            return {
-              id: album.id,
-              title: album.name,
-              imageSrc: album.spotifyCoverUrl
-            }
-          })}
-          onClick={albumCallback}
-        />
-        <p style={{ height: '12vh' }} />
-      </>
+      <LaggerList
+        listOfItems={albums.map(album => {
+          return {
+            id: album.id,
+            title: album.name,
+            imageSrc: album.spotifyCoverUrl
+          }
+        })}
+        onClick={albumCallback}
+      />
     )
   }
 
   return (
-    <div>
+    <ScreenContainer>
       <Helmet>
         <title>Music Sync - Todos os Albums</title>
       </Helmet>
       <Modal />
       <br />
       {Content}
-    </div>
+    </ScreenContainer>
   )
 }
 

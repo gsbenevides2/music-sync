@@ -14,7 +14,7 @@ interface Props {
 
 const LaggerList: React.FC<Props> = props => {
   return (
-    <ul className="flex flex-auto flex-wrap gap-3 justify-center max-w-screen-2xl 2xl:fixed xl:left-2/4 2xl:transform 2xl:-translate-x-2/4">
+    <ul className="flex flex-auto flex-wrap gap-3 justify-center" style={{maxWidth:'800px'}}>
       {props.listOfItems.map(item => (
         <li
           key={item.id}

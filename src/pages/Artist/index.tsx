@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom'
 import LaggerList from '../../components/LaggerList'
 import { useMessage } from '../../components/Message/index.'
 import Modal from '../../components/Modal'
+import { ScreenContainer } from '../../components/ScreenContainer'
 import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
@@ -91,31 +92,28 @@ export const ArtistScreen: React.FC = () => {
   else if (pageState === 'ArtistNotFound') Content = <AlbumNotFound />
   else if (pageState === 'Loaded') {
     Content = (
-      <>
-        <LaggerList
-          listOfItems={musics.map(music => {
-            return {
-              id: music.id,
-              title: music.name,
-              subtitle: music.artist.name,
-              imageSrc: music.album.spotifyCoverUrl
-            }
-          })}
-          onClick={musicCallback}
-        />
-        <p style={{ height: '12vh' }} />
-      </>
+      <LaggerList
+        listOfItems={musics.map(music => {
+          return {
+            id: music.id,
+            title: music.name,
+            subtitle: music.artist.name,
+            imageSrc: music.album.spotifyCoverUrl
+          }
+        })}
+        onClick={musicCallback}
+      />
     )
   }
 
   return (
-    <div>
+    <ScreenContainer minimal>
       <Helmet>
         <title>{artistName || 'Carregando Artista'}</title>
       </Helmet>
       <Modal />
       <br />
       {Content}
-    </div>
+    </ScreenContainer>
   )
 }

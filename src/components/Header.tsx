@@ -40,10 +40,10 @@ const screens = {
     showMenu: false,
     showBack: true
   },
-  '/dashboard/artist/:id':{
+  '/dashboard/artist/:id': {
     title: 'Carregando Artista',
-    showMenu:false,
-    showBack:true
+    showMenu: false,
+    showBack: true
   }
 }
 
@@ -59,7 +59,7 @@ const Header: React.FC<Props> = props => {
   console.log(screenData)
   if (screenData) {
     return (
-      <>
+      <div className="fixed z-20 w-full pt-3 pl-3" style={{ backgroundColor: '#121212' }}>
         <div className="flex flex-column gap-1">
           {screenData[1].showBack ? (
             <CircleButton small onClick={goBack}>
@@ -77,7 +77,7 @@ const Header: React.FC<Props> = props => {
             <Menu />
           </>
         ) : null}
-      </>
+      </div>
     )
   } else return <></>
 }

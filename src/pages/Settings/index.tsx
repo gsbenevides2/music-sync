@@ -2,6 +2,7 @@ import React from 'react'
 import { Helmet } from 'react-helmet'
 import { MdAdd, MdLogout, MdPlaylistAdd } from 'react-icons/md'
 import { useHistory } from 'react-router'
+import { ScreenContainer } from '../../components/ScreenContainer'
 
 function SettingsScreen() {
   const history = useHistory()
@@ -9,7 +10,7 @@ function SettingsScreen() {
     history.push('/dashboard/addMusic')
   }, [])
   return (
-    <div>
+    <ScreenContainer lowerMargin>
       <Helmet>
         <title>Music Sync - Configurações</title>
       </Helmet>
@@ -46,7 +47,7 @@ function SettingsScreen() {
           </div>
         </li>
       </ul>
-    </div>
+    </ScreenContainer>
   )
 }
 
