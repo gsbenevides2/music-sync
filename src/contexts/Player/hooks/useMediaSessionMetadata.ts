@@ -6,7 +6,7 @@ export function useMediaSessionMetadata(
   actualMusic: MusicWithArtistAndAlbum | undefined
 ) {
   React.useEffect(() => {
-    if (actualMusic) {
+    if (actualMusic && 'mediaSession' in navigator) {
       const mediaMetadata = new window.MediaMetadata({
         title: actualMusic.name,
         artist: actualMusic.artist.name,
