@@ -64,4 +64,19 @@ export class DatabaseManager {
       }
     })
   }
+
+  getObjectsUsingFilter(storeName: string, param: string, value: string) {
+    const db = this.db
+    if (db === undefined) throw new Error('Please call open()')
+
+    const store = db.transaction(storeName, 'readwrite').objectStore(storeName)
+    const index = store.index(param)
+
+    return new Promise<any>(resolve => {
+      const request = index.getAll(value)
+      request.onsuccess = () => {
+        resolve(request.result)
+      }
+    })
+  }
 }

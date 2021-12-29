@@ -6,6 +6,7 @@ import Player from './components/Player'
 import { MusicListContextProvider } from './contexts/MusicList'
 import { PlayerContextProvider } from './contexts/Player'
 import AddMusicScreen from './pages/AddMusic'
+import { AlbumScreen } from './pages/Album'
 import AlbumsScreen from './pages/Albums'
 import ArtistsScreen from './pages/Artists'
 import AuthCallback from './pages/AuthCallback'
@@ -36,6 +37,7 @@ const Routes: React.FC = () => {
         <DashboardLayout>
           <Route path="/dashboard" exact component={DashboardScreen} />
           <Route path="/dashboard/albums" exact component={AlbumsScreen} />
+          <Route path="/dashboard/album/:id" exact component={AlbumScreen} />
           <Route path="/dashboard/artists" exact component={ArtistsScreen} />
           <Route path="/dashboard/settings" exact component={SettingsScreen} />
           <Route path="/dashboard/addMusic" exact component={AddMusicScreen} />

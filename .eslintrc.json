@@ -23,6 +23,8 @@
         "import-helpers"
     ],
     "rules": {
+        "no-redeclare": "off",
+        "@typescript-eslint/no-redeclare": ["error"],
         "no-use-before-define": "off",
         "react/prop-types": "off",
         "@typescript-eslint/no-use-before-define": [
