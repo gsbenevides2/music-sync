@@ -2,12 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --player-height:24px;
+}
 body {
   margin: 0px;
   padding: 0px;
   background-color: #121212;
   color: white;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
+body::-webkit-scrollbar {
+  display: none;
+}
+
 .h-23 {
   height: 5.75rem;
 }

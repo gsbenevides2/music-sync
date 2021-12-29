@@ -144,7 +144,7 @@ const Player: React.FC = () => {
                 subtitle: music.artist.name
               }
             })}
-            ulClassName="overflow-y-scroll"
+            ulClassName="overflow-y-scroll hiden-scroll"
             ulStyle={{
               height: `calc(100vh - ${playerHeight + 40}px)`
             }}
