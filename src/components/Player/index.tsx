@@ -81,7 +81,7 @@ const Player: React.FC = () => {
   return (
     <Animated.div
       style={stylesOfAnimationToOpenAndClosePlayer}
-      className="text-white fixed w-screen -bottom-0 left-0"
+      className="text-white fixed w-screen -bottom-0 left-0 z-30"
     >
       {playerContext.actualMusic ? (
         <>
