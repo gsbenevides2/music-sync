@@ -8,6 +8,7 @@ import { PlayerContextProvider } from './contexts/Player'
 import AddMusicScreen from './pages/AddMusic'
 import { AlbumScreen } from './pages/Album'
 import AlbumsScreen from './pages/Albums'
+import { ArtistScreen } from './pages/Artist'
 import ArtistsScreen from './pages/Artists'
 import AuthCallback from './pages/AuthCallback'
 import DashboardScreen from './pages/Dashboard'
@@ -39,6 +40,7 @@ const Routes: React.FC = () => {
           <Route path="/dashboard/albums" exact component={AlbumsScreen} />
           <Route path="/dashboard/album/:id" exact component={AlbumScreen} />
           <Route path="/dashboard/artists" exact component={ArtistsScreen} />
+          <Route path="/dashboard/artist/:id" exact component={ArtistScreen}/>
           <Route path="/dashboard/settings" exact component={SettingsScreen} />
           <Route path="/dashboard/addMusic" exact component={AddMusicScreen} />
         </DashboardLayout>

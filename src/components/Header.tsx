@@ -39,6 +39,11 @@ const screens = {
     title: 'Carregando Album',
     showMenu: false,
     showBack: true
+  },
+  '/dashboard/artist/:id':{
+    title: 'Carregando Artista',
+    showMenu:false,
+    showBack:true
   }
 }
 

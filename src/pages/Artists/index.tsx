@@ -1,5 +1,6 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
+import { useHistory } from 'react-router-dom'
 
 import LaggerList from '../../components/LaggerList'
 import { useMessage } from '../../components/Message/index.'
@@ -18,6 +19,7 @@ type PageState = 'Loading' | 'Empty' | 'Error' | 'Loaded' | 'Offline'
 const ArtistsScreen: React.FC = () => {
   const [artists, setArtists] = React.useState<Artist[]>([])
   const [pageState, setPageState] = React.useState<PageState>('Loading')
+  const history = useHistory()
 
   const showMessage = useMessage()
 
@@ -52,17 +54,14 @@ const ArtistsScreen: React.FC = () => {
     }
     loadArtists(0)
   }, [])
-  /*
-  const musicCallback = React.useCallback(
+  
+  const artistCallback = React.useCallback(
     (id: string) => {
-      const music = albums.find(music => music.id === id)
-      if (!music || !playerContext) return
-      playerContext.playMusic(music)
-      musicListContext?.setMusicList(albums)
+      history.push(`/dashboard/artist/${id}`)
     },
-    [albums]
+    []
   )
-*/
+
   let Content
   if (pageState === 'Loading') Content = <LoadingState />
   else if (pageState === 'Offline') Content = <OfflineState />
@@ -79,6 +78,7 @@ const ArtistsScreen: React.FC = () => {
               imageSrc: album.spotifyCoverUrl
             }
           })}
+          onClick={artistCallback}
         />
         <p style={{ height: '12vh' }} />
       </>
