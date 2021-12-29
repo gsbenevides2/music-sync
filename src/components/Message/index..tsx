@@ -53,7 +53,8 @@ export const MessageProvider: React.FC = props => {
             : 'bg-yellow-700',
           'flex',
           'items-center',
-          'gap-1'
+          'gap-1',
+          'z-50'
         ].join(' ')}
       >
         <MdError />

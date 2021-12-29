@@ -35,32 +35,26 @@ const ArtistsScreen: React.FC = () => {
           if (artistsFetched.length === 10) loadArtists(page + 1)
         })
         .catch(e => {
-          if (e.code) {
-            if (e.code === 'Offline') setPageState('Offline')
-            else if (e.code === 'NotMoreError') setPageState('Loaded')
-            else setPageState('Error')
-          } else if (e.response?.data?.code) {
-            if (
-              e.response.data.code === 'SessionNotFound' ||
-              e.response.data.code === 'TokenInvalid'
-            )
-              showMessage(e.response.data.code)
-            else if (page === 0 && e.response?.data?.code === 'NotFoundArtists')
-              setPageState('Empty')
-            else if (page > 0) showMessage('NotLoadAllArtists')
-            else setPageState('Error')
-          } else setPageState('Error')
+          const code = e.response?.data?.code || e.code || ''
+          if (code === 'Offline') setPageState('Offline')
+          else if (code === 'NotMoreError') setPageState('Loaded')
+          else if (code === 'SessionNotFound' || code === 'TokenInvalid')
+            showMessage(e.response.data.code)
+          else if (page === 0 && code === 'NotFoundArtists')
+            setPageState('Empty')
+          else if (page > 0 && code !== 'NotFoundArtists')
+            showMessage('NotLoadAllArtists')
+          else if (page > 0 && code === 'NotFoundArtists')
+            setPageState('Loaded')
+          else setPageState('Error')
         })
     }
     loadArtists(0)
   }, [])
-  
-  const artistCallback = React.useCallback(
-    (id: string) => {
-      history.push(`/dashboard/artist/${id}`)
-    },
-    []
-  )
+
+  const artistCallback = React.useCallback((id: string) => {
+    history.push(`/dashboard/artist/${id}`)
+  }, [])
 
   let Content
   if (pageState === 'Loading') Content = <LoadingState />

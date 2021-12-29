@@ -7,6 +7,7 @@ interface Props {
   label: string
   id: string
   required?: boolean
+  autoComplete?:'off' | 'on'
 }
 
 const Input: React.FC<Props> = props => {
@@ -15,6 +16,7 @@ const Input: React.FC<Props> = props => {
     left: '1rem',
     fontSize: '1rem',
     lineHeight: '1.5rem',
+    height:'1.5rem',
     color: '#ffffff',
     fontWeight: 500
   }))
@@ -35,6 +37,7 @@ const Input: React.FC<Props> = props => {
       left: '0rem',
       fontSize: '0.75rem',
       lineHeight: '1rem',
+      height:'1rem',
       color: color,
       fontWeight: 600
     })
@@ -46,6 +49,7 @@ const Input: React.FC<Props> = props => {
         left: '0rem',
         fontSize: '0.75rem',
         lineHeight: '1rem',
+        height:'1rem',
         color: '#ffffff',
         fontWeight: 600
       })
@@ -55,6 +59,7 @@ const Input: React.FC<Props> = props => {
         left: '1rem',
         fontSize: '1rem',
         lineHeight: '1.5rem',
+        height:'1.5rem',
         color: '#ffffff',
         fontWeight: 500
       })
@@ -71,6 +76,7 @@ const Input: React.FC<Props> = props => {
         left: '0rem',
         fontSize: '0.75rem',
         lineHeight: '1rem',
+        height:'1rem',
         color: '#ffffff',
         fontWeight: 600
       })
@@ -80,6 +86,7 @@ const Input: React.FC<Props> = props => {
         left: '1rem',
         fontSize: '1rem',
         lineHeight: '1.5rem',
+        height:'1.5rem',
         color: '#ffffff',
         fontWeight: 500
       })
@@ -100,11 +107,12 @@ const Input: React.FC<Props> = props => {
         onChange={e => props.setValue(e.target.value)}
         required={props.required}
         value={props.value}
+        autoComplete={props.autoComplete}
       />
       <animated.label
         style={animationLabel}
         htmlFor={props.id}
-        className="absolute"
+        className="absolute overflow-hidden"
       >
         {props.label}
       </animated.label>

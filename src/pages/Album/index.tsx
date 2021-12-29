@@ -50,23 +50,18 @@ export const AlbumScreen: React.FC = () => {
           if (musicsFetched.length === 10) loadMusics(page + 1)
         })
         .catch(e => {
-          if (e.code) {
-            if (e.code === 'Offline') setPageState('Offline')
-            else if (e.code === 'NotMoreError') setPageState('Loaded')
-            else setPageState('Error')
-          } else if (e.response?.data?.code) {
-            if (
-              e.response.data.code === 'SessionNotFound' ||
-              e.response.data.code === 'TokenInvalid'
-            )
-              showMessage(e.response.data.code)
-            else if (page === 0 && e.response?.data?.code === 'NotFoundMusics')
-              setPageState('EmptyAlbum')
-            else if (page > 0) showMessage('NotLoadAllMusics')
-            else if (e.response.data.code === 'AlbumNotExists') {
-              setAlbumName('Album não existe')
-              setPageState('AlbumNotFound')
-            } else setPageState('Error')
+          const code = e.response?.data?.code || e.code || ''
+          if (code === 'Offline') setPageState('Offline')
+          else if (code === 'NotMoreError') setPageState('Loaded')
+          else if (code === 'SessionNotFound' || code === 'TokenInvalid')
+            showMessage(code)
+          else if (page === 0 && code === 'NotFoundMusics')
+            setPageState('EmptyAlbum')
+          else if (page > 0 && code !== 'NotFoundMusics') showMessage('NotLoadAllMusics')
+          else if(page > 0 && code === 'NotFoundMusics') setPageState('Loaded')
+          else if (code === 'AlbumNotExists') {
+            setAlbumName('Album não existe')
+            setPageState('AlbumNotFound')
           } else setPageState('Error')
         })
     }
