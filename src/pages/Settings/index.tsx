@@ -2,6 +2,7 @@ import React from 'react'
 import { Helmet } from 'react-helmet'
 import { MdAdd, MdLogout, MdPlaylistAdd } from 'react-icons/md'
 import { useHistory } from 'react-router'
+
 import { ScreenContainer } from '../../components/ScreenContainer'
 
 function SettingsScreen() {
