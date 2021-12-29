@@ -14,7 +14,7 @@ function SettingsScreen() {
       <Helmet>
         <title>Music Sync - Configurações</title>
       </Helmet>
-      <ul className="relative transform -left-3 pt-1.5">
+      <ul className="relative transform pt-1.5">
         <li
           onClick={goToAddMusicScreen}
           className="flex w-screen items-center hover:bg-app-200 hover:text-app-900 pl-3 py-1.5 duration-300"
