@@ -39,7 +39,8 @@ export const musicsValidation = {
   album: celebrate({
     query: {
       withAlbum: Joi.boolean().optional(),
-      withArtist: Joi.boolean().optional()
+      withArtist: Joi.boolean().optional(),
+      pag: Joi.number().optional()
     },
     params: {
       id: Joi.string().required()
@@ -48,7 +49,8 @@ export const musicsValidation = {
   artist: celebrate({
     query: {
       withAlbum: Joi.boolean().optional(),
-      withArtist: Joi.boolean().optional()
+      withArtist: Joi.boolean().optional(),
+      pag: Joi.number().optional()
     },
     params: {
       id: Joi.string().required()
