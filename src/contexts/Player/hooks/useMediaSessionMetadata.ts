@@ -14,6 +14,9 @@ export function useMediaSessionMetadata(
         artwork: [
           {
             src: actualMusic.album.spotifyCoverUrl
+          },
+          {
+            src: `http://localhost:4499/image?imageUrl=${actualMusic.album.spotifyCoverUrl}`
           }
         ]
       })
