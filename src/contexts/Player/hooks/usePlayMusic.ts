@@ -20,19 +20,40 @@ export function usePlayMusic(
         setWaiting(false)
       }
 
-      function loadAudio() {
+      function loadAudioOffline() {
+        setWaiting(true)
+        const sessionId = localStorage.getItem('sessionId') as string
+        const token = localStorage.getItem('token') as string
+        // const serverUrl = `${api.defaults.baseURL}musics/play?ytId=${music.youtubeId}&authorization=${token}&sessionid=${sessionId}`
+        const serverUrl = `http://localhost:4499/audio?ytId=${music.youtubeId}&authorization=${token}&sessionid=${sessionId}`
+        audio.current.src = serverUrl
+      }
+
+      function loadAudioOnline() {
         setWaiting(true)
         const sessionId = localStorage.getItem('sessionId') as string
         const token = localStorage.getItem('token') as string
         const serverUrl = `${api.defaults.baseURL}musics/play?ytId=${music.youtubeId}&authorization=${token}&sessionid=${sessionId}`
+        // const serverUrl = `http://localhost:4499/audio?ytId=${music.youtubeId}&authorization=${token}&sessionid=${sessionId}`
         audio.current.src = serverUrl
       }
 
       setActualMusic(music)
+
       audio.current.addEventListener('loadeddata', loadedCallback, {
         signal: controller.signal
       })
-      loadAudio()
+      audio.current.addEventListener(
+        'error',
+        () => {
+          loadAudioOnline()
+        },
+        {
+          signal: controller.signal
+        }
+      )
+
+      loadAudioOffline()
     },
     [audio]
   )

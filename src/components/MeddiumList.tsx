@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { ImageSpecial } from './ImageSpecial'
+
 export interface MediumListItem {
   id: string
   title: string
@@ -26,7 +28,10 @@ const MediumList: React.FC<Props> = props => {
           }}
         >
           <div className="flex">
-            <img src={item.imageSrc} style={{ height: 'calc(10vh)' }} />
+            <ImageSpecial
+              src={item.imageSrc}
+              style={{ height: 'calc(10vh)' }}
+            />
             <div className="flex flex-col m-1">
               <span>{item.title}</span>
               {item.subtitle ? (

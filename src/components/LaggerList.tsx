@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { ImageSpecial } from './ImageSpecial'
+
 export interface LaggerListItem {
   id: string
   title: string
@@ -14,7 +16,10 @@ interface Props {
 
 const LaggerList: React.FC<Props> = props => {
   return (
-    <ul className="flex flex-auto flex-wrap gap-3 justify-center" style={{maxWidth:'800px'}}>
+    <ul
+      className="flex flex-auto flex-wrap gap-3 justify-center"
+      style={{ maxWidth: '800px' }}
+    >
       {props.listOfItems.map(item => (
         <li
           key={item.id}
@@ -22,7 +27,11 @@ const LaggerList: React.FC<Props> = props => {
           className="w-24 cursor-pointer duration-300 transform scale-100 hover:scale-105 hover:bg-app-200 hover:text-app-900 p-1 rounded"
           onClick={() => props.onClick?.(item.id)}
         >
-          <img src={item.imageSrc} className="h-24 w-24" loading="lazy" />
+          <ImageSpecial
+            src={item.imageSrc}
+            className="h-24 w-24"
+            loading="lazy"
+          />
           <p className="break-words overflow-hidden" style={{ height: 46 }}>
             {item.title}
           </p>

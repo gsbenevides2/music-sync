@@ -12,6 +12,7 @@ import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
 import { setAppColor } from '../../utils/colorsTools/setAppColor'
 import CircleButton from '../CircleButton'
+import { ImageSpecial } from '../ImageSpecial'
 import MediumList from '../MeddiumList'
 import { PlayAndPauseMemoButton } from './playAndPauseButton'
 import { ProgressMemo } from './progress'
@@ -109,7 +110,7 @@ const Player: React.FC = () => {
                 </CircleButton>
               </div>
               <div className="musicInfo flex">
-                <img
+                <ImageSpecial
                   src={playerContext.actualMusic?.album.spotifyCoverUrl}
                   style={{ height: playerHeight - 28 }}
                 />
