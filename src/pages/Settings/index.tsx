@@ -17,10 +17,14 @@ function SettingsScreen() {
       </Helmet>
       <ul className="relative transform pt-1.5">
         <li
-          onClick={() => { pushToScreen('/dashboard/addMusic') }}
+          onClick={() => {
+            pushToScreen('/dashboard/addMusic')
+          }}
           className="flex w-screen items-center hover:bg-app-200 hover:text-app-900 pl-3 py-1.5 duration-300"
         >
-          <MdAdd size={30} />
+          <div>
+            <MdAdd size={30} />
+          </div>
           <div className="pl-1">
             <span>Adicionar Música</span>
             <br />
@@ -30,23 +34,37 @@ function SettingsScreen() {
           </div>
         </li>
         <li className="flex w-screen items-center hover:bg-app-200 hover:text-app-900 pl-3 py-1.5 duration-300">
-          <MdPlaylistAdd size={30} />
+          <div>
+            <MdPlaylistAdd size={30} />
+          </div>
           <div className="pl-1">
             <span>Criar Playlist</span>
             <br />
             <span className="text-sm">Criar uma nova playlist.</span>
           </div>
         </li>
-        <li className="flex w-screen items-center hover:bg-app-200 hover:text-app-900 pl-3 py-1.5 duration-300" onClick={()=>{pushToScreen('/dashboard/settings/resourceManager')}}>
-          <MdCellWifi size={30} />
+        <li
+          className="flex w-screen items-center hover:bg-app-200 hover:text-app-900 pl-3 py-1.5 duration-300"
+          onClick={() => {
+            pushToScreen('/dashboard/settings/resourceManager')
+          }}
+        >
+          <div>
+            <MdCellWifi size={30} />
+          </div>
           <div className="pl-1">
             <span>Controle de Prioridade de Recursos na Rede </span>
             <br />
-            <span className="text-sm">Controle de onde vem as músicas, e como o app vai se comportar na falta de internet.</span>
+            <span className="text-sm">
+              Controle de onde vem as músicas, e como o app vai se comportar na
+              falta de internet.
+            </span>
           </div>
         </li>
         <li className="flex w-screen items-center hover:bg-app-200 hover:text-app-900 pl-3 py-1.5 duration-300">
-          <MdLogout size={30} />
+          <div>
+            <MdLogout size={30} />
+          </div>
           <div className="pl-1">
             <span>Sair</span>
             <br />
@@ -56,7 +74,7 @@ function SettingsScreen() {
           </div>
         </li>
       </ul>
-    </ScreenContainer >
+    </ScreenContainer>
   )
 }
 

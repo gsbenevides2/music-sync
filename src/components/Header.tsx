@@ -45,7 +45,7 @@ const screens = {
     showMenu: false,
     showBack: true
   },
-  "/dashboard/settings/resourceManager": {
+  '/dashboard/settings/resourceManager': {
     title: 'Controle de Prioridade de Recursos na Rede',
     showMenu: false,
     showBack: true
@@ -64,21 +64,24 @@ const Header: React.FC<Props> = props => {
 
   if (screenData) {
     return (
-      <div className="fixed z-20 w-full pt-3 pl-3" style={{ backgroundColor: '#121212' }}>
+      <div
+        className="fixed z-20 w-full pt-3 pl-3"
+        style={{ backgroundColor: '#121212' }}
+      >
         <div className="flex flex-column gap-1">
           {screenData[1].showBack ? (
             <CircleButton small onClick={goBack}>
               <MdArrowBack />
             </CircleButton>
           ) : null}
-          <h1 className="text-xl" id="titlePage">
+          <h1 className="text-xl truncate" id="titlePage">
             {screenData[1].title}
           </h1>
         </div>
 
         {screenData[1].showMenu === true ? (
           <>
-            <h2>O que ouviremos agora?</h2>
+            <h2 className="truncate">O que ouviremos agora?</h2>
             <Menu />
           </>
         ) : null}
