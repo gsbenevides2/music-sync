@@ -64,6 +64,7 @@ export const AlbumScreen: React.FC = () => {
         else if (code === 'SessionNotFound' || code === 'TokenInvalid')
           showMessage(code)
         else if (code === 'NotFoundMusics') setPageState('EmptyAlbum')
+        else if (code === 'NotLoadAllMusics') setPageState('Loaded')
         else if (code === 'AlbumNotExists') {
           setAlbumName('Album não existe')
           setPageState('AlbumNotFound')

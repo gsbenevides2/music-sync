@@ -6,18 +6,24 @@ import {
   AddEventListenerOptions,
   EspecialEventListenerOrEventListenerObject
 } from './types'
-import { networkTest, orderByName } from './utils'
+import { getNetworkState, NetworkState, orderByName } from './utils'
 
 export class FetchArtists extends EventTarget {
-  async start() {
-    const netState = await networkTest()
-
-    if (netState === 'api first') this.goToApiFirst()
-    else if (netState === 'db first') this.goToDbFirst()
-    else if (netState === 'db only') this.goToDbOnly()
+  networkState: NetworkState
+  constructor() {
+    super()
+    this.networkState = getNetworkState()
   }
 
-  private async goToApiFirst() {
+  async start() {
+    const networkState = this.networkState
+    console.log(networkState)
+    if (networkState === 'api only') this.goToApiOnly()
+    else if (networkState === 'db first') this.goToDbFirst()
+    else if (networkState === 'db only') this.goToDbOnly()
+  }
+
+  private async goToApiOnly() {
     let page = 0
     while (true) {
       try {
@@ -34,7 +40,7 @@ export class FetchArtists extends EventTarget {
         const code: string =
           error.code || error.response?.data?.code || 'Unknoow Error'
         if (code === 'NotFoundArtists' && page > 0) break
-        else if (page > 0) {
+        else if (this.networkState === 'db first' || page > 0) {
           const dataEvent = new CustomEvent<string>('error', {
             detail: 'NotLoadAllArtists'
           })
@@ -51,7 +57,7 @@ export class FetchArtists extends EventTarget {
 
   private async goToDbFirst() {
     await this.goToDbOnly()
-    this.goToApiFirst()
+    this.goToApiOnly()
   }
 
   private async goToDbOnly() {

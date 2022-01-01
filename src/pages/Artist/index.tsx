@@ -64,6 +64,7 @@ export const ArtistScreen: React.FC = () => {
         else if (code === 'SessionNotFound' || code === 'TokenInvalid')
           showMessage(code)
         else if (code === 'NotFoundMusics') setPageState('EmptyArtist')
+        else if (code === 'NotLoadAllMusics') setPageState('Loaded')
         else if (code === 'ArtistNotExists') {
           setArtistName('Artista não existe')
           setPageState('ArtistNotFound')

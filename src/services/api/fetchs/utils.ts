@@ -9,22 +9,19 @@ export class NotMoreError extends Error {
   code = 'NotMoreError'
 }
 
-export function networkTest() {
-  return new Promise<'api first' | 'db only' | 'db first'>(
-    (resolve, reject) => {
-      const offline = getSetting(OFFLINE_KEY)
-      const offlinePriority = getSetting(OFFLINE_PRIORITY_KEY)
-      const onLine = navigator.onLine
+export type NetworkState = 'api only' | 'db only' | 'db first' | 'offline'
+export function getNetworkState(): NetworkState {
+  const offline = getSetting(OFFLINE_KEY)
+  const offlinePriority = getSetting(OFFLINE_PRIORITY_KEY)
+  const onLine = navigator.onLine
 
-      if (onLine) {
-        if (offlinePriority) resolve('db first')
-        else resolve('api first')
-      } else {
-        if (offline) resolve('db only')
-        else reject(new OfflineError())
-      }
-    }
-  )
+  if (onLine) {
+    if (offlinePriority) return 'db first'
+    else return 'api only'
+  } else {
+    if (offline) return 'db only'
+    else return 'offline'
+  }
 }
 type OrderValue = { name: string }
 

@@ -47,10 +47,12 @@ const DashboardScreen: React.FC = () => {
       'error',
       event => {
         const code = event.detail
+        console.log(code)
         if (code === 'Offline') setPageState('Offline')
         else if (code === 'SessionNotFound' || code === 'TokenInvalid')
           showMessage(code)
         else if (code === 'NotFoundMusics') setPageState('Empty')
+        else if (code === 'NotLoadAllMusics') setPageState('Loaded')
         else setPageState('Error')
       },
       { signal: abort.signal }

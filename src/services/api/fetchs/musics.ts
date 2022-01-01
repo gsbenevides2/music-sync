@@ -13,7 +13,7 @@ import {
   AddEventListenerOptions,
   EspecialEventListenerOrEventListenerObject
 } from './types'
-import { networkTest, orderByName } from './utils'
+import { getNetworkState, NetworkState, orderByName } from './utils'
 
 interface Options {
   withArtist: boolean
@@ -30,21 +30,22 @@ type ResultNotArray =
 
 export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
   options: Options
-
+  networkState: NetworkState
   constructor(options: Options) {
     super()
+    this.networkState = getNetworkState()
     this.options = options
   }
 
   async start() {
-    const netState = await networkTest()
-
-    if (netState === 'api first') this.goToApiFirst()
-    else if (netState === 'db first') this.goToDbFirst()
-    else if (netState === 'db only') this.goToDbOnly()
+    const networkState = this.networkState
+    console.log(networkState)
+    if (networkState === 'api only') this.goToApiOnly()
+    else if (networkState === 'db first') this.goToDbFirst()
+    else if (networkState === 'db only') this.goToDbOnly()
   }
 
-  private async goToApiFirst() {
+  private async goToApiOnly() {
     let page = 0
     while (true) {
       try {
@@ -61,7 +62,7 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
         const code: string =
           error.code || error.response?.data?.code || 'Unknoow Error'
         if (code === 'NotFoundMusics' && page > 0) break
-        else if (page > 0) {
+        else if (this.networkState === 'db first' || page > 0) {
           const dataEvent = new CustomEvent<string>('error', {
             detail: 'NotLoadAllMusics'
           })
@@ -78,7 +79,7 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
 
   private async goToDbFirst() {
     await this.goToDbOnly()
-    this.goToApiFirst()
+    this.goToApiOnly()
   }
 
   private async goToDbOnly() {

@@ -43,6 +43,7 @@ const ArtistsScreen: React.FC = () => {
       event => {
         const code = event.detail
         if (code === 'Offline') setPageState('Offline')
+        else if (code === 'NotLoadAllArtists') setPageState('Loaded')
         else if (code === 'SessionNotFound' || code === 'TokenInvalid')
           showMessage(code)
         else if (code === 'NotFoundArtists') setPageState('Empty')
