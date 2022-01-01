@@ -25,7 +25,7 @@ function SettingsScreen() {
           <div>
             <MdAdd size={30} />
           </div>
-          <div className="pl-3">
+          <div className="px-3">
             <span>Adicionar Música</span>
             <br />
             <span className="text-sm">
@@ -37,7 +37,7 @@ function SettingsScreen() {
           <div>
             <MdPlaylistAdd size={30} />
           </div>
-          <div className="pl-3">
+          <div className="px-3">
             <span>Criar Playlist</span>
             <br />
             <span className="text-sm">Criar uma nova playlist.</span>
@@ -52,7 +52,7 @@ function SettingsScreen() {
           <div>
             <MdCellWifi size={30} />
           </div>
-          <div className="pl-3">
+          <div className="px-3">
             <span>Controle de Prioridade de Recursos na Rede </span>
             <br />
             <span className="text-sm">
@@ -65,7 +65,7 @@ function SettingsScreen() {
           <div>
             <MdLogout size={30} />
           </div>
-          <div className="pl-3">
+          <div className="px-3">
             <span>Sair</span>
             <br />
             <span className="text-sm">

@@ -65,7 +65,7 @@ const Header: React.FC<Props> = props => {
   if (screenData) {
     return (
       <div
-        className="fixed z-20 w-full pt-3 pl-3"
+        className="fixed z-20 w-full pt-3 px-3"
         style={{ backgroundColor: '#121212' }}
       >
         <div className="flex flex-column gap-1">
