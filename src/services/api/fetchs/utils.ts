@@ -1,9 +1,6 @@
 import { getSetting } from '../../../utils/settings'
 import { OFFLINE_KEY, OFFLINE_PRIORITY_KEY } from '../../../utils/settings/keys'
 
-class OfflineError extends Error {
-  code = 'Offline'
-}
 
 export class NotMoreError extends Error {
   code = 'NotMoreError'
