@@ -14,6 +14,7 @@ import AuthCallback from './pages/AuthCallback'
 import DashboardScreen from './pages/Dashboard'
 import HomeScreen from './pages/Home'
 import SettingsScreen from './pages/Settings'
+import { ResourceManagerScreen } from './pages/Settings/resourceMamager'
 
 const DashboardLayout: React.FC = props => {
   return (
@@ -40,8 +41,9 @@ const Routes: React.FC = () => {
           <Route path="/dashboard/albums" exact component={AlbumsScreen} />
           <Route path="/dashboard/album/:id" exact component={AlbumScreen} />
           <Route path="/dashboard/artists" exact component={ArtistsScreen} />
-          <Route path="/dashboard/artist/:id" exact component={ArtistScreen}/>
+          <Route path="/dashboard/artist/:id" exact component={ArtistScreen} />
           <Route path="/dashboard/settings" exact component={SettingsScreen} />
+          <Route path="/dashboard/settings/resourceManager" exact component={ResourceManagerScreen} />
           <Route path="/dashboard/addMusic" exact component={AddMusicScreen} />
         </DashboardLayout>
       </Switch>

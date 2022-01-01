@@ -27,7 +27,7 @@ export class DatabaseManager {
       const store = db
         .transaction(storeName, 'readwrite')
         .objectStore(storeName)
-      const request = store.add(object)
+      const request = store.put(object)
       request.onsuccess = () => {
         resolve()
       }
@@ -42,7 +42,7 @@ export class DatabaseManager {
     return Promise.all(
       objects.map(object => {
         return new Promise<void>(resolve => {
-          const request = store.add(object)
+          const request = store.put(object)
           request.onsuccess = () => {
             resolve()
           }

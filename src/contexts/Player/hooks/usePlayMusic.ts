@@ -2,6 +2,8 @@ import React from 'react'
 
 import api from '../../../services/api/api'
 import { MusicWithArtistAndAlbum } from '../../../services/api/apiTypes'
+import { getSetting } from '../../../utils/settings'
+import { OFFLINE_KEY, OFFLINE_PRIORITY_KEY } from '../../../utils/settings/keys'
 
 export function usePlayMusic(
   audio: React.MutableRefObject<HTMLAudioElement>,
@@ -12,6 +14,10 @@ export function usePlayMusic(
 ) {
   return React.useCallback(
     (music: MusicWithArtistAndAlbum) => {
+      const offline = getSetting(OFFLINE_KEY)
+      const offlinePriority = getSetting(OFFLINE_PRIORITY_KEY)
+      const onLine = navigator.onLine
+
       const controller = new AbortController()
 
       function loadedCallback() {
@@ -52,8 +58,13 @@ export function usePlayMusic(
           signal: controller.signal
         }
       )
-
-      loadAudioOffline()
+      
+      if (onLine) {
+        if (offline && offlinePriority) loadAudioOffline()
+        else loadAudioOnline()
+      } else {
+        if (offline) loadAudioOffline()
+      }
     },
     [audio]
   )

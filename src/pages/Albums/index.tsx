@@ -7,7 +7,8 @@ import { useMessage } from '../../components/Message/index.'
 import Modal from '../../components/Modal'
 import { ScreenContainer } from '../../components/ScreenContainer'
 import { Album } from '../../services/api/apiTypes'
-import { fetchAlbums } from '../../services/api/fetchs/albums'
+import { FetchAlbums } from '../../services/api/fetchs/albums'
+import { useArrayState } from '../../utils/useArrayState'
 import { ErrorState } from '../Dashboard/errorState'
 import { LoadingState } from '../Dashboard/loadingState'
 import { OfflineState } from '../Dashboard/offlineState'
@@ -18,37 +19,38 @@ import { EmptyState } from './emptyState'
 type PageState = 'Loading' | 'Empty' | 'Error' | 'Loaded' | 'Offline'
 
 const AlbumsScreen: React.FC = () => {
-  const [albums, setAlbums] = React.useState<Album[]>([])
+  const [albums, , appendAlbums] = useArrayState<Album>([])
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const history = useHistory()
   const showMessage = useMessage()
 
   React.useEffect(() => {
-    function loadAlbums(page: number) {
-      fetchAlbums(page)
-        .then(albumsFetched => {
-          setPageState('Loaded')
-          setAlbums(albums => {
-            if (albums) return [...albums, ...albumsFetched]
-            else return albumsFetched
-          })
-          if (albumsFetched.length === 10) loadAlbums(page + 1)
-        })
-        .catch(e => {
-          const code = e.response?.data?.code || e.code || ''
+    const abort = new AbortController()
+    const fetcher = new FetchAlbums()
 
-          if (code === 'Offline') setPageState('Offline')
-          else if (code === 'NotMoreError') setPageState('Loaded')
-          else if (code === 'SessionNotFound' || code === 'TokenInvalid')
-            showMessage(code)
-          else if (page === 0 && code === 'NotFoundAlbums')
-            setPageState('Empty')
-          else if (page > 0 && code !== 'NotFoundAlbums') showMessage('NotLoadAllAlbums')
-          else if (page > 0 && code === 'NotFoundAlbums') setPageState('Loaded')
-          else setPageState('Error')
-        })
-    }
-    loadAlbums(0)
+    fetcher.addEventListener(
+      'data',
+      event => {
+        const albumsFetched = event.detail
+        setPageState('Loaded')
+        appendAlbums(albumsFetched, (a, b) => a.id === b.id)
+      },
+      { signal: abort.signal }
+    )
+    fetcher.addEventListener(
+      'error',
+      event => {
+        const code = event.detail
+        if (code === 'Offline') setPageState('Offline')
+        else if (code === 'SessionNotFound' || code === 'TokenInvalid')
+          showMessage(code)
+        else if (code === 'NotFoundAlbums') setPageState('Empty')
+        else setPageState('Error')
+      },
+      { signal: abort.signal }
+    )
+
+    fetcher.start()
   }, [])
 
   const albumCallback = React.useCallback(

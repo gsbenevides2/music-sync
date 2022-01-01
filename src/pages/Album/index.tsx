@@ -9,7 +9,8 @@ import { ScreenContainer } from '../../components/ScreenContainer'
 import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
-import { fetchMusicsByAlbum } from '../../services/api/fetchs/musicsByAlbum'
+import { FetchMusics } from '../../services/api/fetchs/musics'
+import { useArrayState } from '../../utils/useArrayState'
 import { ErrorState } from '../Dashboard/errorState'
 import { LoadingState } from '../Dashboard/loadingState'
 import { OfflineState } from '../Dashboard/offlineState'
@@ -29,7 +30,7 @@ type PageState =
 type Params = { id: string }
 
 export const AlbumScreen: React.FC = () => {
-  const [musics, setMusics] = React.useState<MusicWithArtistAndAlbum[]>([])
+  const [musics, , appendMusics] = useArrayState<MusicWithArtistAndAlbum>([])
   const [albumName, setAlbumName] = React.useState<string>()
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const playerContext = React.useContext(PlayerContext)
@@ -38,35 +39,40 @@ export const AlbumScreen: React.FC = () => {
   const showMessage = useMessage()
 
   React.useEffect(() => {
-    function loadMusics(page: number) {
-      if (!id) return
-      fetchMusicsByAlbum(page, id, true, true)
-        .then(musicsFetched => {
-          setPageState('Loaded')
-          setAlbumName(musicsFetched[0].album.name)
-          setMusics(musics => {
-            if (musics) return [...musics, ...musicsFetched]
-            else return musicsFetched
-          })
-          if (musicsFetched.length === 10) loadMusics(page + 1)
-        })
-        .catch(e => {
-          const code = e.response?.data?.code || e.code || ''
-          if (code === 'Offline') setPageState('Offline')
-          else if (code === 'NotMoreError') setPageState('Loaded')
-          else if (code === 'SessionNotFound' || code === 'TokenInvalid')
-            showMessage(code)
-          else if (page === 0 && code === 'NotFoundMusics')
-            setPageState('EmptyAlbum')
-          else if (page > 0 && code !== 'NotFoundMusics') showMessage('NotLoadAllMusics')
-          else if (page > 0 && code === 'NotFoundMusics') setPageState('Loaded')
-          else if (code === 'AlbumNotExists') {
-            setAlbumName('Album não existe')
-            setPageState('AlbumNotFound')
-          } else setPageState('Error')
-        })
-    }
-    loadMusics(0)
+    const abort = new AbortController()
+    const fetcher = new FetchMusics<MusicWithArtistAndAlbum>({
+      withAlbum: true,
+      withArtist: true,
+      findByAlbumId: id
+    })
+
+    fetcher.addEventListener(
+      'data',
+      event => {
+        const musicsFetched = event.detail
+        setPageState('Loaded')
+        setAlbumName(musicsFetched[0].album.name)
+        appendMusics(musicsFetched, (a, b) => a.id === b.id)
+      },
+      { signal: abort.signal }
+    )
+    fetcher.addEventListener(
+      'error',
+      event => {
+        const code = event.detail
+        if (code === 'Offline') setPageState('Offline')
+        else if (code === 'SessionNotFound' || code === 'TokenInvalid')
+          showMessage(code)
+        else if (code === 'NotFoundMusics') setPageState('EmptyAlbum')
+        else if (code === 'AlbumNotExists') {
+          setAlbumName('Album não existe')
+          setPageState('AlbumNotFound')
+        } else setPageState('Error')
+      },
+      { signal: abort.signal }
+    )
+
+    fetcher.start()
   }, [id])
 
   const musicCallback = React.useCallback(

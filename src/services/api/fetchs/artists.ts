@@ -1,55 +1,119 @@
 import { DatabaseManager } from '../../database/database'
 import api from '../api'
 import { Artist } from '../apiTypes'
-import { networkTest, NotMoreError } from './utils'
+import {
+  EventListenerOrEventListenerObject,
+  AddEventListenerOptions,
+  EspecialEventListenerOrEventListenerObject
+} from './types'
+import { networkTest, orderByName } from './utils'
 
-function fetchArtistsFromApi(page: number) {
-  return new Promise<Artist[]>((resolve, reject) => {
-    api
-      .get<Artist[]>('/artists', {
-        method: 'get',
-        params: {
-          pag: page
-        }
-      })
-      .then(response => {
-        resolve(response.data)
-      })
-      .catch(reject)
-  })
-}
+export class FetchArtists extends EventTarget {
+  async start() {
+    const netState = await networkTest()
 
-async function fetchArtistsFromDatabase(page: number): Promise<Artist[]> {
-  const database = new DatabaseManager()
-  await database.open()
-  const artists: Artist[] = await database.getObjects('artists')
-  return artists
-}
+    if (netState === 'api first') this.goToApiFirst()
+    else if (netState === 'db first') this.goToDbFirst()
+    else if (netState === 'db only') this.goToDbOnly()
+  }
 
-async function saveInDb(artists: Artist[]) {
-  const database = new DatabaseManager()
-  await database.open()
-  return database.addObjects(artists, 'artists')
-}
+  private async goToApiFirst() {
+    let page = 0
+    while (true) {
+      try {
+        const result = await this.fetchFromApi(page)
 
-export function fetchArtists(page: number) {
-  return new Promise<Artist[]>((resolve, reject) => {
-    networkTest()
-      .then(goTo => {
-        if (goTo === 'api') {
-          fetchArtistsFromApi(page)
-            .then(artists => {
-              resolve(artists)
-              saveInDb(artists)
-            })
-            .catch(reject)
-        } else if (page !== 0) {
-          reject(new NotMoreError())
+        const ordenedResult = await orderByName<Artist>(result)
+        const dataEvent = new CustomEvent<Artist[]>('data', {
+          detail: ordenedResult
+        })
+        this.dispatchEvent(dataEvent)
+        await this.saveInDb(ordenedResult)
+        page++
+      } catch (error: any) {
+        const code: string =
+          error.code || error.response?.data?.code || 'Unknoow Error'
+        if (code === 'NotFoundArtists' && page > 0) break
+        else if (page > 0) {
+          const dataEvent = new CustomEvent<string>('error', {
+            detail: 'NotLoadAllArtists'
+          })
+          this.dispatchEvent(dataEvent)
+          break
         } else {
-          fetchArtistsFromDatabase(page).then(resolve)
+          const dataEvent = new CustomEvent<string>('error', { detail: code })
+          this.dispatchEvent(dataEvent)
+          break
         }
-      })
+      }
+    }
+  }
 
-      .catch(reject)
-  })
+  private async goToDbFirst() {
+    await this.goToDbOnly()
+    this.goToApiFirst()
+  }
+
+  private async goToDbOnly() {
+    const result = await this.fetchFromDb()
+
+    const ordenedResult = await orderByName<Artist>(result)
+    const dataEvent = new CustomEvent<Artist[]>('data', {
+      detail: ordenedResult
+    })
+    this.dispatchEvent(dataEvent)
+  }
+
+  private fetchFromApi(page: number) {
+    return new Promise<Artist[]>((resolve, reject) => {
+      api
+        .get<Artist[]>('/artists', {
+          method: 'get',
+          params: {
+            pag: page
+          }
+        })
+        .then(response => {
+          resolve(response.data)
+        })
+        .catch(reject)
+    })
+  }
+
+  private async fetchFromDb(): Promise<Artist[]> {
+    const database = new DatabaseManager()
+    await database.open()
+
+    const albums: Artist[] = await database.getObjects('artists')
+    return albums
+  }
+
+  private async saveInDb(albums: Artist[]) {
+    const database = new DatabaseManager()
+    await database.open()
+
+    await database.addObjects(albums, 'artists')
+  }
+
+  addEventListener(
+    type: string,
+    callback: EventListenerOrEventListenerObject | null,
+    options?: boolean | AddEventListenerOptions
+  ): void
+
+  addEventListener(
+    type: 'data',
+    callback: EspecialEventListenerOrEventListenerObject<Artist[]> | null,
+    options?: boolean | AddEventListenerOptions
+  ): void
+
+  addEventListener(
+    type: 'error',
+    callback: EspecialEventListenerOrEventListenerObject<string> | null,
+    options?: boolean | AddEventListenerOptions
+  ): void
+
+  addEventListener(type: any, callback: any, options?: any): void {
+    super.addEventListener(type, callback, options)
+  }
 }

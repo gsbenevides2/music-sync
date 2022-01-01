@@ -2,6 +2,8 @@ import React from 'react'
 import { MdError } from 'react-icons/md'
 
 import api from '../../services/api/api'
+import { setSetting } from '../../utils/settings'
+import { SESSION_ID_KEY, TOKEN_KEY } from '../../utils/settings/keys'
 
 interface AuthCallbackResponse {
   code: string
@@ -28,8 +30,8 @@ const AuthCallback: React.FC = () => {
         .get<AuthCallbackResponse>(`/authCallback?code=${code}`)
         .then(response => {
           if (response.data.code === 'Authorized') {
-            localStorage.setItem('sessionId', response.data.sessionId)
-            localStorage.setItem('token', response.data.token)
+            setSetting(SESSION_ID_KEY, response.data.sessionId)
+            setSetting(TOKEN_KEY, response.data.token)
             window.close()
           } else {
             console.error(response)

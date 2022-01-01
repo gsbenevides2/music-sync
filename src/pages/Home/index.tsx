@@ -3,6 +3,8 @@ import { Helmet } from 'react-helmet'
 import { useHistory } from 'react-router-dom'
 
 import api from '../../services/api/api'
+import { getSettingString } from '../../utils/settings'
+import { SESSION_ID_KEY, TOKEN_KEY } from '../../utils/settings/keys'
 
 function HomeScreen() {
   const history = useHistory()
@@ -14,8 +16,8 @@ function HomeScreen() {
         const url = response.data as string
         window.open(url)
         const interval = setInterval(() => {
-          const sessionId = localStorage.getItem('sessionId')
-          const token = localStorage.getItem('token')
+          const sessionId = getSettingString(SESSION_ID_KEY)
+          const token = getSettingString(TOKEN_KEY)
           if (sessionId && token) {
             clearInterval(interval)
             history.push('/dashboard')
@@ -27,8 +29,8 @@ function HomeScreen() {
       })
   }, [])
   React.useEffect(() => {
-    const sessionId = localStorage.getItem('sessionId')
-    const token = localStorage.getItem('token')
+    const sessionId = getSettingString(SESSION_ID_KEY)
+    const token = getSettingString(TOKEN_KEY)
     if (sessionId && token) {
       history.push('/dashboard')
     }

@@ -9,7 +9,8 @@ import { ScreenContainer } from '../../components/ScreenContainer'
 import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
-import { fetchMusicsByArtist } from '../../services/api/fetchs/musicsByArtist'
+import { FetchMusics } from '../../services/api/fetchs/musics'
+import { useArrayState } from '../../utils/useArrayState'
 import { ErrorState } from '../Dashboard/errorState'
 import { LoadingState } from '../Dashboard/loadingState'
 import { OfflineState } from '../Dashboard/offlineState'
@@ -29,7 +30,7 @@ type PageState =
 type Params = { id: string }
 
 export const ArtistScreen: React.FC = () => {
-  const [musics, setMusics] = React.useState<MusicWithArtistAndAlbum[]>([])
+  const [musics, , appendMusics] = useArrayState<MusicWithArtistAndAlbum>([])
   const [artistName, setArtistName] = React.useState<string>()
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const playerContext = React.useContext(PlayerContext)
@@ -38,16 +39,48 @@ export const ArtistScreen: React.FC = () => {
   const showMessage = useMessage()
 
   React.useEffect(() => {
+    const abort = new AbortController()
+    const fetcher = new FetchMusics<MusicWithArtistAndAlbum>({
+      withAlbum: true,
+      withArtist: true,
+      findByArtistId: id
+    })
+
+    fetcher.addEventListener(
+      'data',
+      event => {
+        const musicsFetched = event.detail
+        setPageState('Loaded')
+        setArtistName(musicsFetched[0].artist.name)
+        appendMusics(musicsFetched, (a, b) => a.id === b.id)
+      },
+      { signal: abort.signal }
+    )
+    fetcher.addEventListener(
+      'error',
+      event => {
+        const code = event.detail
+        if (code === 'Offline') setPageState('Offline')
+        else if (code === 'SessionNotFound' || code === 'TokenInvalid')
+          showMessage(code)
+        else if (code === 'NotFoundMusics') setPageState('EmptyArtist')
+        else if (code === 'ArtistNotExists') {
+          setArtistName('Artista não existe')
+          setPageState('ArtistNotFound')
+        } else setPageState('Error')
+      },
+      { signal: abort.signal }
+    )
+
+    fetcher.start()
+    /*
     function loadMusics(page: number) {
       if (!id) return
       fetchMusicsByArtist(page, id, true, true)
         .then(musicsFetched => {
           setPageState('Loaded')
           setArtistName(musicsFetched[0].artist.name)
-          setMusics(musics => {
-            if (musics) return [...musics, ...musicsFetched]
-            else return musicsFetched
-          })
+          appendMusics(musicsFetched, (a, b) => a.id === b.id)
           if (musicsFetched.length === 10) loadMusics(page + 1)
         })
         .catch(e => {
@@ -68,6 +101,7 @@ export const ArtistScreen: React.FC = () => {
         })
     }
     loadMusics(0)
+    */
   }, [id])
 
   const musicCallback = React.useCallback(

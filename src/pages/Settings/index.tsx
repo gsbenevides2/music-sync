@@ -1,14 +1,14 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
-import { MdAdd, MdLogout, MdPlaylistAdd } from 'react-icons/md'
+import { MdAdd, MdCellWifi, MdLogout, MdPlaylistAdd } from 'react-icons/md'
 import { useHistory } from 'react-router'
 
 import { ScreenContainer } from '../../components/ScreenContainer'
 
 function SettingsScreen() {
   const history = useHistory()
-  const goToAddMusicScreen = React.useCallback(() => {
-    history.push('/dashboard/addMusic')
+  const pushToScreen = React.useCallback((screen: string) => {
+    history.push(screen)
   }, [])
   return (
     <ScreenContainer lowerMargin>
@@ -17,7 +17,7 @@ function SettingsScreen() {
       </Helmet>
       <ul className="relative transform pt-1.5">
         <li
-          onClick={goToAddMusicScreen}
+          onClick={() => { pushToScreen('/dashboard/addMusic') }}
           className="flex w-screen items-center hover:bg-app-200 hover:text-app-900 pl-3 py-1.5 duration-300"
         >
           <MdAdd size={30} />
@@ -37,6 +37,14 @@ function SettingsScreen() {
             <span className="text-sm">Criar uma nova playlist.</span>
           </div>
         </li>
+        <li className="flex w-screen items-center hover:bg-app-200 hover:text-app-900 pl-3 py-1.5 duration-300" onClick={()=>{pushToScreen('/dashboard/settings/resourceManager')}}>
+          <MdCellWifi size={30} />
+          <div className="pl-1">
+            <span>Controle de Prioridade de Recursos na Rede </span>
+            <br />
+            <span className="text-sm">Controle de onde vem as músicas, e como o app vai se comportar na falta de internet.</span>
+          </div>
+        </li>
         <li className="flex w-screen items-center hover:bg-app-200 hover:text-app-900 pl-3 py-1.5 duration-300">
           <MdLogout size={30} />
           <div className="pl-1">
@@ -48,7 +56,7 @@ function SettingsScreen() {
           </div>
         </li>
       </ul>
-    </ScreenContainer>
+    </ScreenContainer >
   )
 }
 

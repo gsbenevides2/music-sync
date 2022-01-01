@@ -44,6 +44,11 @@ const screens = {
     title: 'Carregando Artista',
     showMenu: false,
     showBack: true
+  },
+  "/dashboard/settings/resourceManager": {
+    title: 'Controle de Prioridade de Recursos na Rede',
+    showMenu: false,
+    showBack: true
   }
 }
 
@@ -56,7 +61,7 @@ const Header: React.FC<Props> = props => {
   const goBack = React.useCallback(() => {
     history.goBack()
   }, [])
-  console.log(screenData)
+
   if (screenData) {
     return (
       <div className="fixed z-20 w-full pt-3 pl-3" style={{ backgroundColor: '#121212' }}>

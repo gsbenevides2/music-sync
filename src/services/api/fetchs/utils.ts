@@ -1,3 +1,6 @@
+import { getSetting } from '../../../utils/settings'
+import { OFFLINE_KEY, OFFLINE_PRIORITY_KEY } from '../../../utils/settings/keys'
+
 class OfflineError extends Error {
   code = 'Offline'
 }
@@ -7,11 +10,36 @@ export class NotMoreError extends Error {
 }
 
 export function networkTest() {
-  return new Promise<'api' | 'db'>((resolve, reject) => {
-    const offline = localStorage.getItem('offline')
-    console.log(offline)
-    if (navigator.onLine === true) resolve('api')
-    else if (offline === 'true') resolve('db')
-    else reject(new OfflineError())
+  return new Promise<'api first' | 'db only' | 'db first'>(
+    (resolve, reject) => {
+      const offline = getSetting(OFFLINE_KEY)
+      const offlinePriority = getSetting(OFFLINE_PRIORITY_KEY)
+      const onLine = navigator.onLine
+
+      if (onLine) {
+        if (offlinePriority) resolve('db first')
+        else resolve('api first')
+      } else {
+        if (offline) resolve('db only')
+        else reject(new OfflineError())
+      }
+    }
+  )
+}
+type OrderValue = { name: string }
+
+export function orderByName<T extends OrderValue>(value: T[]): Promise<T[]> {
+  return new Promise(resolve => {
+    value.sort((a, b) => {
+      if (a.name > b.name) {
+        return 1
+      }
+      if (a.name < b.name) {
+        return -1
+      }
+      // a must be equal to b
+      return 0
+    })
+    resolve(value)
   })
 }

@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --player-height:24px;
+  --player-height: 24px;
 }
 body {
   margin: 0px;
@@ -131,4 +131,21 @@ body::-webkit-scrollbar {
 
 .hover-black:hover {
   background-color: rgba(0, 0, 0, 0.6);
+}
+.shimmer {
+  color: grey;
+  display: inline-block;
+  background-color: white;
+  -webkit-mask: linear-gradient(-60deg, #000 30%, #0005, #000 70%) right/300%
+    100%;
+  background-repeat: no-repeat;
+  animation: shimmer 2.5s infinite;
+  font-size: 50px;
+  max-width: 200px;
+}
+
+@keyframes shimmer {
+  100% {
+    -webkit-mask-position: left;
+  }
 }
