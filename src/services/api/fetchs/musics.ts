@@ -128,7 +128,7 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
     if (findByArtistId) {
       musics = await database.getObjectsUsingFilter(
         'musics',
-        'artistsId',
+        'artistId',
         findByArtistId
       )
     } else if (findByAlbumId) {
