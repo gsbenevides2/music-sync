@@ -4,93 +4,362 @@
   "description": "Player de Músicas do Guilherme!",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo48.png",
-      "type": "image/png",
-      "sizes": "48x48",
-      "purpose": "any"
-    },
-    {
-      "src": "logo72.png",
-      "type": "image/png",
-      "sizes": "72x72",
-      "purpose": "any"
-    },
-    {
-      "src": "logo96.png",
-      "type": "image/png",
-      "sizes": "96x96",
-      "purpose": "any"
-    },
-    {
-      "src": "logo128.png",
-      "type": "image/png",
-      "sizes": "128x128",
-      "purpose": "any"
-    },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any"
-    },
-    {
-      "src": "logo384.png",
-      "type": "image/png",
-      "sizes": "384x384",
-      "purpose": "any"
-    },
-    {
-      "src": "logo512.png",
+      "src": "/icons/app/icon512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
     },
     {
-      "src": "logo_mask_48.png",
+      "src": "/icons/app/icon384.png",
       "type": "image/png",
-      "sizes": "48x48",
-      "purpose": "maskable"
+      "sizes": "384x384",
+      "purpose": "any"
     },
     {
-      "src": "logo_mask_72.png",
-      "type": "image/png",
-      "sizes": "72x72",
-      "purpose": "maskable"
-    },
-    {
-      "src": "logo_mask_96.png",
-      "type": "image/png",
-      "sizes": "96x96",
-      "purpose": "maskable"
-    },
-    {
-      "src": "logo_mask_128.png",
-      "type": "image/png",
-      "sizes": "128x128",
-      "purpose": "maskable"
-    },
-    {
-      "src": "logo_mask_192.png",
+      "src": "/icons/app/icon192.png",
       "type": "image/png",
       "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon180.png",
+      "type": "image/png",
+      "sizes": "180x180",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon152.png",
+      "type": "image/png",
+      "sizes": "152x152",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon144.png",
+      "type": "image/png",
+      "sizes": "144x144",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon128.png",
+      "type": "image/png",
+      "sizes": "128x128",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon120.png",
+      "type": "image/png",
+      "sizes": "120x120",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon114.png",
+      "type": "image/png",
+      "sizes": "114x114",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon96.png",
+      "type": "image/png",
+      "sizes": "96x96",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon76.png",
+      "type": "image/png",
+      "sizes": "76x76",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon72.png",
+      "type": "image/png",
+      "sizes": "72x72",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon64.png",
+      "type": "image/png",
+      "sizes": "64x64",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon60.png",
+      "type": "image/png",
+      "sizes": "60x60",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon57.png",
+      "type": "image/png",
+      "sizes": "57x57",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon48.png",
+      "type": "image/png",
+      "sizes": "48x48",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon32.png",
+      "type": "image/png",
+      "sizes": "32x32",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon24.png",
+      "type": "image/png",
+      "sizes": "24x24",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/icon16.png",
+      "type": "image/png",
+      "sizes": "16x16",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/app/mask512.png",
+      "type": "image/png",
+      "sizes": "512x512",
       "purpose": "maskable"
     },
     {
-      "src": "logo_mask_384.png",
+      "src": "/icons/app/mask384.png",
       "type": "image/png",
       "sizes": "384x384",
       "purpose": "maskable"
     },
     {
-      "src": "logo_mask_512.png",
+      "src": "/icons/app/mask192.png",
       "type": "image/png",
-      "sizes": "512x512",
+      "sizes": "192x192",
       "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask180.png",
+      "type": "image/png",
+      "sizes": "180x180",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask152.png",
+      "type": "image/png",
+      "sizes": "152x152",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask144.png",
+      "type": "image/png",
+      "sizes": "144x144",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask128.png",
+      "type": "image/png",
+      "sizes": "128x128",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask120.png",
+      "type": "image/png",
+      "sizes": "120x120",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask114.png",
+      "type": "image/png",
+      "sizes": "114x114",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask96.png",
+      "type": "image/png",
+      "sizes": "96x96",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask76.png",
+      "type": "image/png",
+      "sizes": "76x76",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask72.png",
+      "type": "image/png",
+      "sizes": "72x72",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask64.png",
+      "type": "image/png",
+      "sizes": "64x64",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask60.png",
+      "type": "image/png",
+      "sizes": "60x60",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask57.png",
+      "type": "image/png",
+      "sizes": "57x57",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask48.png",
+      "type": "image/png",
+      "sizes": "48x48",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask32.png",
+      "type": "image/png",
+      "sizes": "32x32",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask24.png",
+      "type": "image/png",
+      "sizes": "24x24",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/app/mask16.png",
+      "type": "image/png",
+      "sizes": "16x16",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Playlists",
+      "url": "/playlists",
+      "description": "Veja suas playlists.",
+      "icons": [
+        {
+          "src": "/icons/shortcuts/playlists192.png",
+          "type": "image/png",
+          "sizes": "192x192"
+        },
+        {
+          "src": "/icons/shortcuts/playlists144.png",
+          "type": "image/png",
+          "sizes": "144x144"
+        },
+        {
+          "src": "/icons/shortcuts/playlists96.png",
+          "type": "image/png",
+          "sizes": "96x96"
+        },
+        {
+          "src": "/icons/shortcuts/playlists72.png",
+          "type": "image/png",
+          "sizes": "72x72"
+        },
+        {
+          "src": "/icons/shortcuts/playlists36.png",
+          "type": "image/png",
+          "sizes": "36x36"
+        }
+      ]
+    },
+    {
+      "name": "Artistas",
+      "url": "/artists",
+      "description": "Veja todos os artistas.",
+      "icons": [
+        {
+          "src": "/icons/shortcuts/artists192.png",
+          "type": "image/png",
+          "sizes": "192x192"
+        },
+        {
+          "src": "/icons/shortcuts/artists144.png",
+          "type": "image/png",
+          "sizes": "144x144"
+        },
+        {
+          "src": "/icons/shortcuts/artists96.png",
+          "type": "image/png",
+          "sizes": "96x96"
+        },
+        {
+          "src": "/icons/shortcuts/artists72.png",
+          "type": "image/png",
+          "sizes": "72x72"
+        },
+        {
+          "src": "/icons/shortcuts/artists36.png",
+          "type": "image/png",
+          "sizes": "36x36"
+        }
+      ]
+    },
+    {
+      "name": "Albums",
+      "url": "/playlists",
+      "description": "Veja todos os albums.",
+      "icons": [
+        {
+          "src": "/icons/shortcuts/album192.png",
+          "type": "image/png",
+          "sizes": "192x192"
+        },
+        {
+          "src": "/icons/shortcuts/album144.png",
+          "type": "image/png",
+          "sizes": "144x144"
+        },
+        {
+          "src": "/icons/shortcuts/album96.png",
+          "type": "image/png",
+          "sizes": "96x96"
+        },
+        {
+          "src": "/icons/shortcuts/album72.png",
+          "type": "image/png",
+          "sizes": "72x72"
+        },
+        {
+          "src": "/icons/shortcuts/album36.png",
+          "type": "image/png",
+          "sizes": "36x36"
+        }
+      ]
+    },
+    {
+      "name": "Configurações",
+      "url": "/settings",
+      "description": "Ir para configurações.",
+      "icons": [
+        {
+          "src": "/icons/shortcuts/settings192.png",
+          "type": "image/png",
+          "sizes": "192x192"
+        },
+        {
+          "src": "/icons/shortcuts/settings144.png",
+          "type": "image/png",
+          "sizes": "144x144"
+        },
+        {
+          "src": "/icons/shortcuts/settings96.png",
+          "type": "image/png",
+          "sizes": "96x96"
+        },
+        {
+          "src": "/icons/shortcuts/settings72.png",
+          "type": "image/png",
+          "sizes": "72x72"
+        },
+        {
+          "src": "/icons/shortcuts/settings36.png",
+          "type": "image/png",
+          "sizes": "36x36"
+        }
+      ]
     }
   ],
   "start_url": ".",
