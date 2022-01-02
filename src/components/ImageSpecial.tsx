@@ -14,11 +14,9 @@ export const ImageSpecial: React.FC<
 
   const onError = React.useCallback(() => {
     if (url === props.src) {
-      console.log('5')
       setUrl(`http://localhost:4499/image?imageUrl=${props.src}`)
     } else if (url === `http://localhost:4499/image?imageUrl=${props.src}`) {
       setUrl(props.src || ImageShimmer)
-      console.log('6')
     }
   }, [url])
 
@@ -27,21 +25,12 @@ export const ImageSpecial: React.FC<
     const offlinePriority = getSetting(OFFLINE_PRIORITY_KEY)
     const onLine = navigator.onLine
     if (onLine) {
-      if (offline && offlinePriority) {
+      if (offline && offlinePriority)
         setUrl(`http://localhost:4499/image?imageUrl=${props.src}`)
-        console.log('1')
-      } else {
-        setUrl(props.src || ImageShimmer)
-        console.log('2')
-      }
+      else setUrl(props.src || ImageShimmer)
     } else {
-      if (offline) {
-        setUrl(`http://localhost:4499/image?imageUrl=${props.src}`)
-        console.log('3')
-      } else {
-        setUrl(ImageShimmer)
-        console.log('4')
-      }
+      if (offline) setUrl(`http://localhost:4499/image?imageUrl=${props.src}`)
+      else setUrl(ImageShimmer)
     }
   }, [props.src])
 

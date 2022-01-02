@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet'
 
 import LaggerList from '../../components/LaggerList'
 import { useMessage } from '../../components/Message/index.'
-import Modal from '../../components/Modal'
+import Modal, { ModalEvents, useModal } from '../../components/Modal'
 import { ScreenContainer } from '../../components/ScreenContainer'
 import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
@@ -20,6 +20,7 @@ import { OfflineState } from './offlineState'
 type PageState = 'Loading' | 'Empty' | 'Error' | 'Loaded' | 'Offline'
 
 const DashboardScreen: React.FC = () => {
+  const modal = useModal(['AddToPlaylist', 'DeleteMusic'])
   const [musics, , appendMusics] = useArrayState<MusicWithArtistAndAlbum>([])
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const playerContext = React.useContext(PlayerContext)
@@ -47,7 +48,7 @@ const DashboardScreen: React.FC = () => {
       'error',
       event => {
         const code = event.detail
-        console.log(code)
+
         if (code === 'Offline') setPageState('Offline')
         else if (code === 'SessionNotFound' || code === 'TokenInvalid')
           showMessage(code)
@@ -61,7 +62,7 @@ const DashboardScreen: React.FC = () => {
     fetcher.start()
   }, [])
 
-  const musicCallback = React.useCallback(
+  const onClickCallback = React.useCallback(
     (id: string) => {
       const music = musics.find(music => music.id === id)
       if (!music || !playerContext) return
@@ -70,6 +71,16 @@ const DashboardScreen: React.FC = () => {
     },
     [musics]
   )
+  const onRightClick = React.useCallback(
+    (id: string) => {
+      modal.setOpen(true)
+    },
+    [musics]
+  )
+
+  const onModalEvent = React.useCallback((event: ModalEvents) => {
+    console.log(event)
+  }, [])
 
   let Content
   if (pageState === 'Loading') Content = <LoadingState />
@@ -87,7 +98,8 @@ const DashboardScreen: React.FC = () => {
             imageSrc: music.album.spotifyCoverUrl
           }
         })}
-        onClick={musicCallback}
+        onClick={onClickCallback}
+        onRightClick={onRightClick}
       />
     )
   }
@@ -97,7 +109,7 @@ const DashboardScreen: React.FC = () => {
       <Helmet>
         <title>Music Sync - Dashboard</title>
       </Helmet>
-      <Modal />
+      <Modal {...modal.props} onEvent={onModalEvent} />
       {Content}
     </ScreenContainer>
   )

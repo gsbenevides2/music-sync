@@ -14,6 +14,7 @@ interface Props {
   ulStyle?: React.CSSProperties
   listOfItems: MediumListItem[]
   onClick?: (id: string) => void
+  onRightClick?: (id: string) => void
 }
 
 const MediumList: React.FC<Props> = props => {
@@ -23,9 +24,8 @@ const MediumList: React.FC<Props> = props => {
         <li
           key={item.id}
           className="flex justify-between hover-black pointer p-2 "
-          onClick={() => {
-            props.onClick?.(item.id)
-          }}
+          onClick={() => props.onClick?.(item.id)}
+          onContextMenu={() => props.onRightClick?.(item.id)}
         >
           <div className="flex">
             <ImageSpecial

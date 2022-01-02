@@ -31,7 +31,7 @@ export function useAudioEvents(
     audio.current.addEventListener(
       'error',
       e => {
-        console.log(e)
+        console.error(e)
       },
       options
     )

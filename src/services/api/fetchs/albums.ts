@@ -17,7 +17,7 @@ export class FetchAlbums extends EventTarget {
 
   async start() {
     const networkState = this.networkState
-    console.log(networkState)
+
     if (networkState === 'api only') this.goToApiOnly()
     else if (networkState === 'db first') this.goToDbFirst()
     else if (networkState === 'db only') this.goToDbOnly()

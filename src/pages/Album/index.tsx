@@ -4,7 +4,6 @@ import { useParams } from 'react-router-dom'
 
 import LaggerList from '../../components/LaggerList'
 import { useMessage } from '../../components/Message/index.'
-import Modal from '../../components/Modal'
 import { ScreenContainer } from '../../components/ScreenContainer'
 import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
@@ -117,7 +116,7 @@ export const AlbumScreen: React.FC = () => {
       <Helmet>
         <title>{albumName || 'Carregando Album'}</title>
       </Helmet>
-      <Modal />
+      
       <br />
       {Content}
     </ScreenContainer>

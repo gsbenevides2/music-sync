@@ -4,7 +4,6 @@ import { useHistory } from 'react-router-dom'
 
 import LaggerList from '../../components/LaggerList'
 import { useMessage } from '../../components/Message/index.'
-import Modal from '../../components/Modal'
 import { ScreenContainer } from '../../components/ScreenContainer'
 import { Album } from '../../services/api/apiTypes'
 import { FetchAlbums } from '../../services/api/fetchs/albums'
@@ -86,7 +85,7 @@ const AlbumsScreen: React.FC = () => {
       <Helmet>
         <title>Music Sync - Todos os Albums</title>
       </Helmet>
-      <Modal />
+   
       <br />
       {Content}
     </ScreenContainer>

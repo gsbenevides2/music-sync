@@ -12,6 +12,7 @@ export interface LaggerListItem {
 interface Props {
   listOfItems: LaggerListItem[]
   onClick?: (id: string) => void
+  onRightClick?: (id: string) => void
 }
 
 const LaggerList: React.FC<Props> = props => {
@@ -26,6 +27,11 @@ const LaggerList: React.FC<Props> = props => {
           style={{ maxHeight: 184 }}
           className="w-24 cursor-pointer duration-300 transform scale-100 hover:scale-105 hover:bg-app-200 hover:text-app-900 p-1 rounded"
           onClick={() => props.onClick?.(item.id)}
+          onContextMenu={e => {
+            e.preventDefault()
+            props.onRightClick?.(item.id)
+            return false
+          }}
         >
           <ImageSpecial
             src={item.imageSrc}
