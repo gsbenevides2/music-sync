@@ -235,7 +235,7 @@
   "shortcuts": [
     {
       "name": "Playlists",
-      "url": "/playlists",
+      "url": "/dashboard/playlists",
       "description": "Veja suas playlists.",
       "icons": [
         {
@@ -267,7 +267,7 @@
     },
     {
       "name": "Artistas",
-      "url": "/artists",
+      "url": "/dashboard/artists",
       "description": "Veja todos os artistas.",
       "icons": [
         {
@@ -299,31 +299,31 @@
     },
     {
       "name": "Albums",
-      "url": "/playlists",
+      "url": "/dashboard/albums",
       "description": "Veja todos os albums.",
       "icons": [
         {
-          "src": "/icons/shortcuts/album192.png",
+          "src": "/icons/shortcuts/albums192.png",
           "type": "image/png",
           "sizes": "192x192"
         },
         {
-          "src": "/icons/shortcuts/album144.png",
+          "src": "/icons/shortcuts/albums144.png",
           "type": "image/png",
           "sizes": "144x144"
         },
         {
-          "src": "/icons/shortcuts/album96.png",
+          "src": "/icons/shortcuts/albums96.png",
           "type": "image/png",
           "sizes": "96x96"
         },
         {
-          "src": "/icons/shortcuts/album72.png",
+          "src": "/icons/shortcuts/albums72.png",
           "type": "image/png",
           "sizes": "72x72"
         },
         {
-          "src": "/icons/shortcuts/album36.png",
+          "src": "/icons/shortcuts/albums36.png",
           "type": "image/png",
           "sizes": "36x36"
         }
@@ -331,7 +331,7 @@
     },
     {
       "name": "Configurações",
-      "url": "/settings",
+      "url": "/dashboard/settings",
       "description": "Ir para configurações.",
       "icons": [
         {
