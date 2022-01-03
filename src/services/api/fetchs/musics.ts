@@ -176,16 +176,21 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
     const albums: Album[] = []
 
     const musicsF: Music[] = result.map(m => {
-      let albumId
+      let albumId: string
+      let artistId: string
 
       if ('album' in m) {
         albumId = m.album.id
+        const findedAlbum = albums.findIndex(album => album.id === albumId)
+        if (findedAlbum === -1) albums.push(m.album)
       } else {
         albumId = m.albumId
       }
-      let artistId
+
       if ('artist' in m) {
         artistId = m.artist.id
+        const findedArtist = artists.findIndex(artist => artist.id === artistId)
+        if (findedArtist === -1) artists.push(m.artist)
       } else {
         artistId = m.artistId
       }
@@ -203,6 +208,7 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
         artistId
       }
     })
+    
     await Promise.all([
       database.addObjects(artists, 'artists'),
       database.addObjects(albums, 'albums'),

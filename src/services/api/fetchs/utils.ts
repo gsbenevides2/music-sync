@@ -1,7 +1,6 @@
 import { getSetting } from '../../../utils/settings'
 import { OFFLINE_KEY, OFFLINE_PRIORITY_KEY } from '../../../utils/settings/keys'
 
-
 export class NotMoreError extends Error {
   code = 'NotMoreError'
 }
@@ -13,7 +12,7 @@ export function getNetworkState(): NetworkState {
   const onLine = navigator.onLine
 
   if (onLine) {
-    if (offlinePriority) return 'db first'
+    if (offline && offlinePriority) return 'db first'
     else return 'api only'
   } else {
     if (offline) return 'db only'

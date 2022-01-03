@@ -1,6 +1,12 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
-import { MdAdd, MdCellWifi, MdLogout, MdPlaylistAdd } from 'react-icons/md'
+import {
+  MdAdd,
+  MdCellWifi,
+  MdLogout,
+  MdPlaylistAdd,
+  MdShare
+} from 'react-icons/md'
 import { useHistory } from 'react-router'
 
 import { OptionsItem, OptionsList } from '../../components/OptionsList'
@@ -18,6 +24,12 @@ function SettingsScreen() {
       icon: MdAdd,
       description: 'Coloque uma nova música a sua biblioteca.',
       onClick: () => pushToScreen('/dashboard/addMusic')
+    },
+    {
+      title: 'Autenticar Spotify e Youtube',
+      icon: MdShare,
+      description: 'Autentique com spotify e youtube'
+      // onClick:()=>
     },
     {
       title: 'Criar Playlist',
@@ -45,7 +57,10 @@ function SettingsScreen() {
         <title>Music Sync - Configurações</title>
       </Helmet>
 
-      <OptionsList ulClassName="relative transform pt-1.5 w-screen" items={items} />
+      <OptionsList
+        ulClassName="relative transform pt-1.5 w-screen"
+        items={items}
+      />
     </ScreenContainer>
   )
 }

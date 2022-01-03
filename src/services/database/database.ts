@@ -28,6 +28,7 @@ export class DatabaseManager {
         .transaction(storeName, 'readwrite')
         .objectStore(storeName)
       const request = store.put(object)
+      request.onerror = console.error
       request.onsuccess = () => {
         resolve()
       }
@@ -43,6 +44,7 @@ export class DatabaseManager {
       objects.map(object => {
         return new Promise<void>(resolve => {
           const request = store.put(object)
+          request.onerror = console.error
           request.onsuccess = () => {
             resolve()
           }
