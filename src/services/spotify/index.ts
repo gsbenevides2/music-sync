@@ -293,4 +293,22 @@ export class SpotifyService {
         })
     })
   }
+
+  deletePlaylist(spotifyPlaylistId: string) {
+    return new Promise<void>((resolve, reject) => {
+      this.authenticate().then(() => {
+        this.spotifyWebApi
+          .unfollowPlaylist(spotifyPlaylistId)
+          .then(() => {
+            resolve()
+          })
+          .catch(error => {
+            if (error?.body?.error?.message === 'The access token expired') {
+              this.clearToekns()
+              reject(new SpotifyNotLinked())
+            } else reject(new SpotifyUnknownError())
+          })
+      })
+    })
+  }
 }

@@ -250,4 +250,10 @@ export class YoutubeService {
         })
     })
   }
+
+  async deletePlaylist(ytPlaylistId: string) {
+    await this.authenticate()
+
+    await this.ytApi.playlists.delete({ id: ytPlaylistId })
+  }
 }

@@ -137,4 +137,26 @@ export class PlaylistController {
         }
       })
   }
+
+  async deletePlaylist(req: Request, res: Response) {
+    const playlistId = req.params.playlistId
+    const playlistModel = new PlaylistsModel({})
+    playlistModel
+      .delete(playlistId)
+      .then(() => {
+        res.status(200).json({
+          code: 'PlaylistDeleted',
+          message: 'Playlist successfully deleted!'
+        })
+      })
+      .catch(error => {
+        if (error instanceof AppError) {
+          res.status(error.status).json(error.toJson())
+        } else {
+          console.log(error)
+          const unknownError = new UnknownError()
+          res.status(unknownError.status).json(unknownError.toJson())
+        }
+      })
+  }
 }

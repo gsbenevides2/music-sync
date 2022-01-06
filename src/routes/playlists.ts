@@ -53,4 +53,12 @@ playlistsRoutes.delete(
   playlistController.removeMusic
 )
 
+playlistsRoutes.delete(
+  '/playlist/:playlistId',
+  authValidantion.authenticate,
+  authController.authenticate,
+  playlistsValidation.deletePlaylist,
+  playlistController.deletePlaylist
+)
+
 export { playlistsRoutes }

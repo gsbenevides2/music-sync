@@ -34,6 +34,13 @@ export class PlaylistsModel {
     this.musicsModel = options.musicsModel
   }
 
+  async get(playlistId: string) {
+    return await db<Playlist>('playlists')
+      .select()
+      .where('id', playlistId)
+      .first()
+  }
+
   create(name: string) {
     return new Promise(resolve => {
       const id = uuid()
@@ -154,7 +161,9 @@ export class PlaylistsModel {
     )
     if (!actualPlaylistItem) throw new PlaylistItemNotFound()
 
-    const playlist = await db<Playlist>('playlists')
+    const playlist = await db<Pick<Playlist, 'spotifyId' | 'youtubeId'>>(
+      'playlists'
+    )
       .select(['spotifyId', 'youtubeId'])
       .where('id', playlistId)
       .first()
@@ -255,5 +264,31 @@ export class PlaylistsModel {
       spotifyService.deleteItem(playlist.spotifyId, music.spotifyId)
     if (musicInPlaylist.youtubePlaylistItemId)
       youtubeService.deleteItem(musicInPlaylist.youtubePlaylistItemId)
+  }
+
+  async delete(playlistId: string) {
+    const playlist = await db<Pick<Playlist, 'spotifyId' | 'youtubeId'>>(
+      'playlists'
+    )
+      .select()
+      .where('id', playlistId)
+      .first()
+    if (!playlist) throw new PlaylistNotFound()
+
+    await db('playlists').delete().where('id', playlistId)
+
+    if (playlist.youtubeId) {
+      this.youtubeService
+        .deletePlaylist(playlist.youtubeId)
+        .then(() => {})
+        .catch(() => {})
+    }
+
+    if (playlist.spotifyId) {
+      this.spotifyService
+        .deletePlaylist(playlist.spotifyId)
+        .then(() => {})
+        .catch(() => {})
+    }
   }
 }
