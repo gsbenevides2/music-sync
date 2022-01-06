@@ -12,6 +12,7 @@
     "dev": "ts-node-dev --rs --ignore-watch=node_modules --respawn --transpile-only src/index.ts",
     "dev:test": "ts-node-dev --rs --ignore-watch=node_modules --respawn --transpile-only src/utils/test.ts",
     "knex:migrate": "knex --knexfile knex.ts migrate:latest",
+    "knex:rollback":"knex --knexfile knex.ts migrate:rollback",
     "build": "tsc && knex --knexfile knex.ts migrate:latest"
   },
   "devDependencies": {

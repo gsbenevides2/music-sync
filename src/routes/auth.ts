@@ -13,4 +13,11 @@ authRoutes.get(
   authController.authCallback
 )
 
+authRoutes.get(
+  '/revokeCredentials',
+  authValidantion.authenticate,
+  authController.authenticate,
+  authController.revokeCredentials
+)
+
 export { authRoutes }

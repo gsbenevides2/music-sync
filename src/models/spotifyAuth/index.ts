@@ -10,4 +10,8 @@ export class SpotifyAuthModel {
   getNewToken(code: string, state: string) {
     return spotifyService.getNewToken(code, state)
   }
+
+  async isAuthenticated() {
+    return await spotifyService.isAuthenticated()
+  }
 }

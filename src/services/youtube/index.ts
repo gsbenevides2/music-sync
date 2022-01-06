@@ -7,7 +7,11 @@ import { v4 as uuid } from 'uuid'
 import { db } from '../../database/db'
 import { decrypt, encrypt } from '../../utils/cripto'
 import { removeSpecialCaractersAndSpaces } from '../../utils/removeSpecialCaractersAndSpaces'
-import { YoutubeLoginInvalid, YoutubeSecureIdInvalid } from './errors'
+import {
+  YoutubeLoginInvalid,
+  YoutubeNotLinked,
+  YoutubeSecureIdInvalid
+} from './errors'
 
 interface Config {
   name: string
@@ -152,17 +156,21 @@ export class YoutubeService {
     const rows = await db<Config>('configs')
       .select('*')
       .where('name', 'LIKE', '%youtubeToken%')
-    const token: Credentials = Object.fromEntries(
-      rows.map(row => {
-        const key = this.tokenKeys.find(key => row.name.includes(key))
-        let value = row.value1
-        if (key === 'access_token' || key === 'refresh_token') {
-          value = decrypt(`${value}${row.value2}`)
-        }
-        return [key, value]
-      })
-    )
-    this.oauthClient.setCredentials(token)
+    if (rows.length) {
+      const token: Credentials = Object.fromEntries(
+        rows.map(row => {
+          const key = this.tokenKeys.find(key => row.name.includes(key))
+          let value = row.value1
+          if (key === 'access_token' || key === 'refresh_token') {
+            value = decrypt(`${value}${row.value2}`)
+          }
+          return [key, value]
+        })
+      )
+      this.oauthClient.setCredentials(token)
+    } else {
+      throw new YoutubeNotLinked()
+    }
   }
 
   async createPlaylist(name: string): Promise<string> {
@@ -224,6 +232,22 @@ export class YoutubeService {
 
     await this.ytApi.playlistItems.delete({
       id: youtubePlaylistItemId
+    })
+  }
+
+  isAuthenticated() {
+    return new Promise(resolve => {
+      this.authenticate()
+        .then(() => {
+          return this.ytApi.playlists.list({ part: ['snippet'], id: ['me'] })
+        })
+        .then(result => {
+          if (result.status === 200) resolve(true)
+          else resolve(false)
+        })
+        .catch(e => {
+          resolve(false)
+        })
     })
   }
 }

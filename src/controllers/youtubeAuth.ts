@@ -27,4 +27,9 @@ export class YoutubeAuthController {
         }
       })
   }
+
+  async isAuthenticated(_: Request, res: Response) {
+    const result = await youtubeService.isAuthenticated()
+    res.send({ result })
+  }
 }

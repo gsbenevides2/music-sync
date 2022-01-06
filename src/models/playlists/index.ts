@@ -3,9 +3,11 @@ import { v4 as uuid } from 'uuid'
 import { db } from '../../database/db'
 import { SpotifyService } from '../../services/spotify'
 import { YoutubeService } from '../../services/youtube'
+import { UnknownError } from '../../utils/error'
 import { MusicsModel } from '../musics'
 import { NotFoundMusic } from '../musics/errors'
 import { Music } from '../musics/types'
+import { useOptionalData } from '../musics/utils'
 import {
   PlaylistItemNotFound,
   PlaylistNotFound,
@@ -13,27 +15,80 @@ import {
 } from './errors'
 import { Playlist, PlaylistItem } from './types'
 
-const musicsModel = new MusicsModel()
 const youtubeService = new YoutubeService()
 const spotifyService = new SpotifyService()
 
-export class PlaylistsModel {
-  async create(name: string) {
-    const youtubeId = await youtubeService.createPlaylist(name)
-    const spotifyId = await spotifyService.createPlaylist(name)
-    const id = uuid()
+interface Options {
+  musicsModel?: MusicsModel
+}
 
-    await db('playlists').insert({
-      id,
-      name,
-      youtubeId,
-      spotifyId
+export class PlaylistsModel {
+  musicsModel?: MusicsModel
+
+  youtubeService: YoutubeService
+  spotifyService: SpotifyService
+  constructor(options: Options) {
+    this.youtubeService = new YoutubeService()
+    this.spotifyService = new SpotifyService()
+
+    this.musicsModel = options.musicsModel
+  }
+
+  create(name: string) {
+    return new Promise(resolve => {
+      const id = uuid()
+      db<Playlist>('playlists')
+        .insert({
+          id,
+          name
+        })
+        .then(() => {
+          resolve(id)
+          youtubeService
+            .createPlaylist(name)
+            .then(youtubeId => {
+              console.log(youtubeId)
+              return db('playlists').where('id', id).update({ youtubeId })
+            })
+            .catch(console.log)
+          spotifyService
+            .createPlaylist(name)
+            .then(spotifyId => {
+              console.log(spotifyId)
+              return db('playlists').where('id', id).update({ spotifyId })
+            })
+            .catch(console.log)
+        })
     })
-    return id
+  }
+
+  async list() {
+    const playlists = await db<Playlist>('playlists').select()
+    return playlists
+  }
+
+  async getMusics(
+    playlistId: string,
+    withAlbum: boolean,
+    withArtist: boolean,
+    pag: number
+  ) {
+    const q1 = db('musics_playlists')
+    q1.leftJoin('musics', 'musics_playlists.musicId', '=', 'musics.id')
+    q1.where('musics_playlists.playlistId', '=', playlistId)
+    q1.offset(pag * 10)
+    q1.orderBy('musics_playlists.position', 'asc')
+    q1.limit(10)
+    const { query, rowManager } = useOptionalData(withAlbum, withArtist, q1)
+
+    const result = await query
+
+    return result.map(rowManager)
   }
 
   async addMusic(playlistId: string, musicId: string) {
-    const music = await musicsModel.getOnlyColumns(musicId, [
+    if (!this.musicsModel) throw new UnknownError()
+    const music = await this.musicsModel.getOnlyColumns(musicId, [
       'spotifyId',
       'youtubeId'
     ])
@@ -51,22 +106,46 @@ export class PlaylistsModel {
     const exists = playlistsItemsRows.findIndex(row => row.musicId === musicId)
     if (exists !== -1) throw new SongAlreadyPlaylist()
 
-    await spotifyService.addToPlaylist(playlist.spotifyId, music.spotifyId)
-    const youtubeId = await youtubeService.addToPlaylist(
-      playlist.youtubeId,
-      music.youtubeId
-    )
-
     await db<PlaylistItem>('musics_playlists').insert({
       position: playlistsItemsRows.length,
       musicId,
       playlistId,
-      youtubeId
+      ytSync: false,
+      spotifySync: false
     })
+
+    if (playlist.spotifyId) {
+      spotifyService
+        .addToPlaylist(playlist.spotifyId, music.spotifyId)
+        .then(() => {
+          return db('musics_playlists')
+            .update({
+              spotifySync: true
+            })
+            .where('playlistId', playlistId)
+            .where('musicId', musicId)
+        })
+        .then()
+    }
+
+    if (playlist.youtubeId) {
+      youtubeService
+        .addToPlaylist(playlist.youtubeId, music.youtubeId)
+        .then(youtubePlaylistItemId => {
+          return db('musics_playlists')
+            .update({
+              youtubePlaylistItemId,
+              ytSync: true
+            })
+            .where('playlistId', playlistId)
+            .where('musicId', musicId)
+        })
+    }
   }
 
   async rearrange(newPosition: number, playlistId: string, musicId: string) {
-    const playlistMusicList = await db('musics_playlists')
+    if (!this.musicsModel) throw new UnknownError()
+    const playlistMusicList = await db<PlaylistItem>('musics_playlists')
       .select('*')
       .where('playlistId', playlistId)
       .orderBy('position', 'asc')
@@ -81,25 +160,19 @@ export class PlaylistsModel {
       .first()
     if (!playlist) throw new PlaylistNotFound()
 
-    const music = await musicsModel.getOnlyColumns(musicId, ['youtubeId'])
+    const music = await this.musicsModel.getOnlyColumns(musicId, ['youtubeId'])
     if (!music) throw new NotFoundMusic()
 
     const newPlaylists = playlistMusicList.filter(music => {
       return music.musicId !== musicId
     })
-    newPlaylists.splice(newPosition, 0, { playlistId, musicId })
-
-    await spotifyService.rearrange(
-      playlist.spotifyId,
-      actualPlaylistItem.position,
-      newPosition
-    )
-    await youtubeService.rearrange(
-      playlist.youtubeId,
-      actualPlaylistItem.youtubeId,
-      music.youtubeId,
-      newPosition
-    )
+    newPlaylists.splice(newPosition, 0, {
+      playlistId,
+      musicId,
+      position: newPosition,
+      spotifySync: false,
+      ytSync: false
+    })
 
     await Promise.all(
       newPlaylists.map(async (music, index) => {
@@ -109,25 +182,58 @@ export class PlaylistsModel {
           .where('playlistId', music.playlistId)
       })
     )
+    if (playlist.spotifyId) {
+      spotifyService
+        .rearrange(playlist.spotifyId, actualPlaylistItem.position, newPosition)
+        .then(() => {
+          return db<PlaylistItem>('musics_playlists')
+            .where('musicId', musicId)
+            .where('playlistId', playlistId)
+            .update({
+              spotifySync: true
+            })
+        })
+        .then()
+    }
+    if (actualPlaylistItem.youtubePlaylistItemId && playlist.youtubeId) {
+      youtubeService
+        .rearrange(
+          playlist.youtubeId,
+          actualPlaylistItem.youtubePlaylistItemId,
+          music.youtubeId,
+          newPosition
+        )
+        .then(() => {
+          return db<PlaylistItem>('musics_playlists')
+            .where('musicId', musicId)
+            .where('playlistId', playlistId)
+            .update({
+              ytSync: true
+            })
+        })
+        .then()
+    }
   }
 
   async removeMusic(playlistId: string, musicId: string) {
-    const listOfMusics = (await db('musics_playlists')
+    const listOfMusics = await db<PlaylistItem>('musics_playlists')
       .select('*')
       .where('playlistId', playlistId)
-      .orderBy('position', 'asc')) as PlaylistItem[]
+      .orderBy('position', 'asc')
     const musicInPlaylist = listOfMusics.find(item => item.musicId === musicId)
     if (!musicInPlaylist) throw new PlaylistItemNotFound()
 
-    const [music] = (await db('musics')
+    const music = await db<Pick<Music, 'youtubeId' | 'spotifyId'>>('musics')
       .select(['youtubeId', 'spotifyId'])
-      .where('id', musicId)) as Pick<Music, 'youtubeId' | 'spotifyId'>[]
-    const [playlist] = (await db('playlists')
-      .select('spotifyId')
-      .where('id', playlistId)) as Pick<Playlist, 'spotifyId'>[]
+      .where('id', musicId)
+      .first()
+    if (!music) throw new NotFoundMusic()
 
-    await spotifyService.deleteItem(playlist.spotifyId, music.spotifyId)
-    await youtubeService.deleteItem(musicInPlaylist.youtubeId)
+    const playlist = await db<Pick<Playlist, 'spotifyId'>>('playlists')
+      .select('spotifyId')
+      .where('id', playlistId)
+      .first()
+    if (!playlist) throw new PlaylistNotFound()
 
     const trx = await db.transaction()
     await trx('musics_playlists')
@@ -137,12 +243,17 @@ export class PlaylistsModel {
 
     const newPlaylist = listOfMusics.filter(item => item.musicId !== musicId)
     const promises = newPlaylist.map(async (item, index) => {
-      await trx('musics_playlists')
+      await trx<PlaylistItem>('musics_playlists')
         .update({ position: index })
         .where('musicId', item.musicId)
         .where('playlistId', item.playlistId)
     })
     await Promise.all(promises)
     await trx.commit()
+
+    if (playlist?.spotifyId)
+      spotifyService.deleteItem(playlist.spotifyId, music.spotifyId)
+    if (musicInPlaylist.youtubePlaylistItemId)
+      youtubeService.deleteItem(musicInPlaylist.youtubePlaylistItemId)
   }
 }

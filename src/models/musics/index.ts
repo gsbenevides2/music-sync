@@ -5,109 +5,46 @@ import { SpotifyService } from '../../services/spotify'
 import { YoutubeService } from '../../services/youtube'
 import { AlbumsModel } from '../albums'
 import { ArtistsModel } from '../artists'
+import { PlaylistsModel } from '../playlists'
+import { PlaylistItem } from '../playlists/types'
 import {
   AlbumNotExists,
   ArtistNotExists,
   MusicAlreadyExists,
+  NotFoundMusic,
   SelectYoutubeMusic
 } from './errors'
-import { Music, MusicList } from './types'
+import { Music } from './types'
+import { useOptionalData } from './utils'
 
-const artistsModel = new ArtistsModel()
-const albumsModel = new AlbumsModel()
-const spotifyService = new SpotifyService()
-const youtubeService = new YoutubeService()
-
-function useOptionalData(withAlbum: boolean, withArtist: boolean) {
-  const columns = [
-    'musics.id as musicId',
-    'musics.name as musicName',
-    'musics.youtubeId as youtubeId',
-    'musics.spotifyId as musicSpotifyId',
-    'musics.trackNumber as trackNumber',
-    'musics.discNumber as discNumber',
-    'musics.lyrics as lyrics',
-    'musics.createdAt as musicCreatedAt'
-  ]
-  if (withAlbum) {
-    columns.push(
-      'albums.id as albumId',
-      'albums.name as albumName',
-      'albums.spotifyId as albumSpotifyId',
-      'albums.spotifyCoverUrl as albumsSpotifyCoverUrl',
-      'albums.spotifyYear as albumSpotifyYear',
-      'albums.createdAt as albumCreatedAt'
-    )
-  } else {
-    columns.push('musics.albumId as albumId')
-  }
-  if (withArtist) {
-    columns.push(
-      'artists.id as artistId',
-      'artists.name as artistName',
-      'artists.spotifyId as artistSpotifyId',
-      'artists.spotifyCoverUrl as artistSpotifyCoverUrl',
-      'artists.spotifyGenre as artistSpotifyGenre',
-      'artists.createdAt as artistCreatedAt'
-    )
-  } else {
-    columns.push('musics.artistId as artistsId')
-  }
-  const query = db('musics').select(columns)
-  if (withAlbum) query.innerJoin('albums', 'albums.id', 'musics.albumId')
-  if (withArtist) query.innerJoin('artists', 'artists.id', 'musics.artistId')
-  function rowManager(row: any) {
-    let music: MusicList = {
-      id: row.musicId,
-      name: row.musicName,
-      youtubeId: row.youtubeId,
-      spotifyId: row.musicSpotifyId,
-      trackNumber: row.trackNumber,
-      discNumber: row.discNumber,
-      lyrics: row.lyrics,
-      createdAt: row.musicCreatedAt
-    }
-    if (withAlbum) {
-      music = {
-        ...music,
-        album: {
-          id: row.albumId,
-          name: row.albumName,
-          spotifyId: row.albumSpotifyId,
-          spotifyCoverUrl: row.albumsSpotifyCoverUrl,
-          spotifyYear: row.albumSpotifyYear,
-          createdAt: row.albumCreatedAt
-        }
-      }
-    } else {
-      music.albumId = row.albumId
-    }
-    if (withArtist) {
-      music = {
-        ...music,
-        artist: {
-          id: row.artistId,
-          name: row.artistName,
-          spotifyId: row.artistSpotifyId,
-          spotifyCoverUrl: row.artistSpotifyCoverUrl,
-          spotifyGenre: row.artistSpotifyGenre,
-          createdAt: row.artistCreatedAt
-        }
-      }
-    } else {
-      music.artistId = row.artistId
-    }
-    return music
-  }
-  return {
-    query,
-    rowManager
-  }
+interface Options {
+  artistsModel?: ArtistsModel
+  albumsModel?: AlbumsModel
+  playlistModel?: PlaylistsModel
 }
 
 export class MusicsModel {
+  artistsModel?: ArtistsModel
+  albumsModel?: AlbumsModel
+  playlistModel?: PlaylistsModel
+
+  spotifyService: SpotifyService
+  youtubeService: YoutubeService
+
+  constructor(options: Options) {
+    this.spotifyService = new SpotifyService()
+    this.youtubeService = new YoutubeService()
+
+    this.artistsModel = options.artistsModel
+    this.albumsModel = options.albumsModel
+    this.playlistModel = options.playlistModel
+  }
+
   async create(spotifyLink: string, useYoutubeId?: string) {
-    const spotifyMusicData = await spotifyService.getMusicData(spotifyLink)
+    if (!this.artistsModel) throw new Error('Invalid Artist Model')
+    if (!this.albumsModel) throw new Error('Invalid Album Model')
+
+    const spotifyMusicData = await this.spotifyService.getMusicData(spotifyLink)
 
     const rowsAlreadyExists = await db<Pick<Music, 'id'>>('musics')
       .select('id')
@@ -115,7 +52,7 @@ export class MusicsModel {
     if (rowsAlreadyExists.length)
       throw new MusicAlreadyExists(rowsAlreadyExists[0].id)
 
-    const youtubeData = await youtubeService.getMusic(
+    const youtubeData = await this.youtubeService.getMusic(
       spotifyMusicData.name,
       spotifyMusicData.artist.name,
       spotifyMusicData.album.name
@@ -129,13 +66,13 @@ export class MusicsModel {
     } else throw new SelectYoutubeMusic(youtubeData)
 
     let artistTableId
-    const artistInDb = await artistsModel.findBySpotifyIdReturnOnlyId(
+    const artistInDb = await this.artistsModel.findBySpotifyIdReturnOnlyId(
       spotifyMusicData.artist.id
     )
     if (artistInDb.length) {
       artistTableId = artistInDb[0].id
     } else {
-      artistTableId = await artistsModel.create({
+      artistTableId = await this.artistsModel.create({
         name: spotifyMusicData.artist.name,
         spotifyId: spotifyMusicData.artist.id,
         spotifyCoverUrl: spotifyMusicData.artist.coverUrl,
@@ -144,13 +81,13 @@ export class MusicsModel {
     }
 
     let albumTableId
-    const albumInDb = await albumsModel.findBySpotifyIdReturnOnlyId(
+    const albumInDb = await this.albumsModel.findBySpotifyIdReturnOnlyId(
       spotifyMusicData.album.id
     )
     if (albumInDb.length) {
       albumTableId = albumInDb[0].id
     } else {
-      albumTableId = await albumsModel.create({
+      albumTableId = await this.albumsModel.create({
         name: spotifyMusicData.album.name,
         spotifyId: spotifyMusicData.album.id,
         spotifyCoverUrl: spotifyMusicData.album.coverUrl,
@@ -172,7 +109,11 @@ export class MusicsModel {
   }
 
   async list(withAlbum: boolean, withArtist: boolean, pag: number) {
-    const { query, rowManager } = useOptionalData(withAlbum, withArtist)
+    const { query, rowManager } = useOptionalData(
+      withAlbum,
+      withArtist,
+      db('musics')
+    )
 
     query.offset(pag * 10)
     query.orderBy('musics.name', 'asc')
@@ -188,7 +129,11 @@ export class MusicsModel {
     pag: number,
     name: string
   ) {
-    const { query, rowManager } = useOptionalData(withAlbum, withArtist)
+    const { query, rowManager } = useOptionalData(
+      withAlbum,
+      withArtist,
+      db('musics')
+    )
 
     query.offset(pag * 10)
     query.where('musics.name', 'LIKE', `%${name}%`)
@@ -200,7 +145,11 @@ export class MusicsModel {
   }
 
   async get(withAlbum: boolean, withArtist: boolean, id: string) {
-    const { query, rowManager } = useOptionalData(withAlbum, withArtist)
+    const { query, rowManager } = useOptionalData(
+      withAlbum,
+      withArtist,
+      db('musics')
+    )
     query.where('musics.id', id)
     const row = await query.first()
     return row ? rowManager(row) : null
@@ -216,9 +165,14 @@ export class MusicsModel {
     withArtist: boolean,
     pag: number
   ) {
-    const albumsExists = await albumsModel.exists(albumId)
+    if (!this.albumsModel) throw new Error('Invalid Album Model')
+    const albumsExists = await this.albumsModel.exists(albumId)
     if (!albumsExists) throw new AlbumNotExists()
-    const { query, rowManager } = useOptionalData(withAlbum, withArtist)
+    const { query, rowManager } = useOptionalData(
+      withAlbum,
+      withArtist,
+      db('musics')
+    )
 
     query.where('musics.albumId', '=', albumId)
     query.offset(pag * 10)
@@ -235,9 +189,14 @@ export class MusicsModel {
     withArtist: boolean,
     pag: number
   ) {
-    const artistsExists = await artistsModel.exists(artistId)
+    if (!this.artistsModel) throw new Error('Invalid Artist Model')
+    const artistsExists = await this.artistsModel.exists(artistId)
     if (!artistsExists) throw new ArtistNotExists()
-    const { query, rowManager } = useOptionalData(withAlbum, withArtist)
+    const { query, rowManager } = useOptionalData(
+      withAlbum,
+      withArtist,
+      db('musics')
+    )
 
     query.where('musics.artistId', '=', artistId)
     query.offset(pag * 10)
@@ -246,5 +205,34 @@ export class MusicsModel {
 
     const rows = await query
     return rows.map(rowManager)
+  }
+
+  async isExists(musicId: string) {
+    const ele = await db<Music>('musics').select().where('id', musicId).first()
+    return ele !== undefined
+  }
+
+  async getPlaylists(musicId: string) {
+    if (!this.playlistModel) throw new Error('Invalid Playlist Model')
+    const exists = await this.isExists(musicId)
+    if (!exists) throw new NotFoundMusic()
+
+    const playlistsIds = await db<Pick<PlaylistItem, 'playlistId'>>(
+      'musics_playlists'
+    )
+      .where('musicId', musicId)
+      .select('playlistId')
+
+    return playlistsIds
+  }
+
+  async deleteMusic(musicId: string) {
+    const playlists = await this.getPlaylists(musicId)
+    const promises = playlists.map(async ({ playlistId }) => {
+      return this.playlistModel?.removeMusic(playlistId, musicId)
+    })
+    await Promise.all(promises)
+
+    await db('musics').delete().where('id', musicId)
   }
 }

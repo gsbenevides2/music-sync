@@ -64,4 +64,22 @@ export class AuthController {
         }
       })
   }
+
+  async revokeCredentials(req: Request, res: Response) {
+    const { sessionid: sessionId } = req.headers
+    authModel
+      .revokeCredentials(sessionId as string)
+      .then(() => {
+        res.send('OK')
+      })
+      .catch(error => {
+        if (error instanceof AppError) {
+          res.status(error.status).json(error.toJson())
+        } else {
+          console.error(error)
+          const unknownError = new UnknownError()
+          res.status(unknownError.status).json(unknownError.toJson())
+        }
+      })
+  }
 }

@@ -1,5 +1,11 @@
 import { AppError } from '../../utils/error'
 
+export class YoutubeNotLinked extends AppError {
+  constructor() {
+    super('YoutubeNotLinked', 'You Youtube account is not linked', 400)
+  }
+}
+
 export class YoutubeLoginInvalid extends AppError {
   constructor() {
     super(

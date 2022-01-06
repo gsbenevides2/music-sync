@@ -28,7 +28,6 @@ export class AuthModel {
         Accept: 'application/json'
       }
     })
-   
 
     const { data: githubUserData } = await axios({
       method: 'get',
@@ -56,5 +55,9 @@ export class AuthModel {
       .first()
     if (!row) throw new SessionNotFound()
     if (compare(row.token, token) === false) throw new TokenInvalid()
+  }
+
+  async revokeCredentials(sessionId: string) {
+    await db('sessions').delete().where('id', sessionId)
   }
 }

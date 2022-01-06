@@ -9,6 +9,13 @@ const playlistsRoutes = Router()
 const authController = new AuthController()
 const playlistController = new PlaylistController()
 
+playlistsRoutes.get(
+  '/playlists',
+  authValidantion.authenticate,
+  authController.authenticate,
+  playlistController.list
+)
+
 playlistsRoutes.post(
   '/playlist',
   authValidantion.authenticate,
@@ -16,6 +23,14 @@ playlistsRoutes.post(
   playlistsValidation.create,
   playlistController.create
 )
+playlistsRoutes.get(
+  '/playlist/:playlistId',
+  authValidantion.authenticate,
+  authController.authenticate,
+  playlistsValidation.listMusics,
+  playlistController.getMusics
+)
+
 playlistsRoutes.post(
   '/playlist/:playlistId/addMusic',
   authValidantion.authenticate,
@@ -34,6 +49,7 @@ playlistsRoutes.delete(
   '/playlist/:playlistId/:musicId',
   authValidantion.authenticate,
   authController.authenticate,
+  playlistsValidation.deleteMusic,
   playlistController.removeMusic
 )
 

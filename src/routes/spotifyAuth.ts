@@ -21,4 +21,12 @@ spotifyAuthRoutes.get(
   spotifyAuthValidantions.callback,
   spotifyAuthController.callback
 )
+
+spotifyAuthRoutes.get(
+  '/spotifyAuth/isAuthenticated',
+  authValidantion.authenticate,
+  authController.authenticate,
+  spotifyAuthController.isAuthenticated
+)
+
 export { spotifyAuthRoutes }

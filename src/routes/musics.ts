@@ -28,6 +28,7 @@ musicsRoutes.get(
   '/musics/play',
   musicsValidation.play,
   authController.authenticateInQuery,
+  musicsValidation.play,
   musicsController.play
 )
 musicsRoutes.get(
@@ -37,10 +38,19 @@ musicsRoutes.get(
   musicsValidation.get,
   musicsController.get
 )
+
+musicsRoutes.delete(
+  '/music/:id',
+  authValidantion.authenticate,
+  authController.authenticate,
+  musicsController.delete
+)
+
 musicsRoutes.get(
   '/music/:id/download',
   authValidantion.authenticate,
   authController.authenticate,
+  musicsValidation.download,
   musicsController.download
 )
 

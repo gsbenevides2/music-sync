@@ -81,7 +81,7 @@ export class Downloader extends EventEmitter {
       status: 'GetMusicData'
     })
     return new Promise((resolve, reject) => {
-      const musicsModel = new MusicsModel()
+      const musicsModel = new MusicsModel({})
       musicsModel
         .get(true, true, this.musicId)
         .then(data => {

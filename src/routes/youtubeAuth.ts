@@ -21,4 +21,12 @@ youtubeAuthRoutes.get(
   youtubeAuthValidantions.callback,
   youtubeAuthController.callback
 )
+
+youtubeAuthRoutes.get(
+  '/youtubeAuth/isAuthenticated',
+  authValidantion.authenticate,
+  authController.authenticate,
+  youtubeAuthController.isAuthenticated
+)
+
 export { youtubeAuthRoutes }

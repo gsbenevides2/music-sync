@@ -55,5 +55,10 @@ export const musicsValidation = {
     params: {
       id: Joi.string().required()
     }
+  }),
+  download: celebrate({
+    params: {
+      id: Joi.string().required()
+    }
   })
 }

@@ -5,7 +5,11 @@ import { v4 as uuid } from 'uuid'
 
 import { db } from '../../database/db'
 import { decrypt, encrypt } from '../../utils/cripto'
-import { SpotifySecureIdInvalid } from './errors'
+import {
+  SpotifyNotLinked,
+  SpotifySecureIdInvalid,
+  SpotifyUnknownError
+} from './errors'
 
 interface AuthorizationCodeGrantResponse {
   access_token: string
@@ -172,50 +176,121 @@ export class SpotifyService {
     const rows = await db<Config>('configs')
       .select('*')
       .where('name', 'LIKE', '%spotifyToken%')
-    const token: AuthorizationCodeGrantResponse = Object.fromEntries(
-      rows.map(row => {
-        const key = this.tokenKeys.find(key => row.name.includes(key))
-        let value = row.value1
-        if (key === 'access_token' || key === 'refresh_token') {
-          value = decrypt(`${value}${row.value2}`)
-        }
-        return [key, value]
-      })
-    )
-    this.spotifyWebApi.setAccessToken(token.access_token)
-    this.spotifyWebApi.setRefreshToken(token.refresh_token)
+    if (rows.length) {
+      const token: AuthorizationCodeGrantResponse = Object.fromEntries(
+        rows.map(row => {
+          const key = this.tokenKeys.find(key => row.name.includes(key))
+          let value = row.value1
+          if (key === 'access_token' || key === 'refresh_token') {
+            value = decrypt(`${value}${row.value2}`)
+          }
+          return [key, value]
+        })
+      )
+      this.spotifyWebApi.setAccessToken(token.access_token)
+      this.spotifyWebApi.setRefreshToken(token.refresh_token)
+    } else {
+      throw new SpotifyNotLinked()
+    }
   }
 
-  async createPlaylist(name: string): Promise<string> {
-    await this.authenticate()
-    const result = await this.spotifyWebApi.createPlaylist(name)
-    // const { body: token } = await spotifyWebApi.refreshAccessToken()
-    // await saveToken(token as AuthorizationCodeGrantResponse)
-    return result.body.id
+  private async clearToekns() {
+    await db('configs').delete().where('name', 'LIKE', '%spotifyToken%')
   }
 
-  async addToPlaylist(playlistId: string, musicId: string) {
-    await this.authenticate()
-    await this.spotifyWebApi.addTracksToPlaylist(playlistId, [
-      `spotify:track:${musicId}`
-    ])
-    // const { body: token } = await spotifyWebApi.refreshAccessToken()
-    // await saveToken(token as AuthorizationCodeGrantResponse)
+  createPlaylist(name: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.authenticate()
+        .then(() => {
+          return this.spotifyWebApi.createPlaylist(name)
+        })
+        .then(result => {
+          resolve(result.body.id)
+        })
+        .catch(error => {
+          if (error?.body?.error?.message === 'The access token expired') {
+            this.clearToekns()
+            reject(new SpotifyNotLinked())
+          } else reject(new SpotifyUnknownError())
+        })
+    })
   }
 
-  async rearrange(playlistId: string, oldPositon: number, position: number) {
-    await this.authenticate()
-    await this.spotifyWebApi.reorderTracksInPlaylist(
-      playlistId,
-      oldPositon,
-      position
-    )
+  addToPlaylist(playlistId: string, musicId: string) {
+    return new Promise<void>((resolve, reject) => {
+      this.authenticate()
+        .then(() => {
+          return this.spotifyWebApi.addTracksToPlaylist(playlistId, [
+            `spotify:track:${musicId}`
+          ])
+        })
+        .then(() => {
+          resolve()
+        })
+        .catch(error => {
+          if (error?.body?.error?.message === 'The access token expired') {
+            this.clearToekns()
+            reject(new SpotifyNotLinked())
+          } else reject(new SpotifyUnknownError())
+        })
+    })
   }
 
-  async deleteItem(playlistId: string, musicId: string) {
-    await this.authenticate()
-    await this.spotifyWebApi.removeTracksFromPlaylist(playlistId, [
-      { uri: `spotify:track:${musicId}` }
-    ])
+  rearrange(playlistId: string, oldPositon: number, position: number) {
+    return new Promise<void>((resolve, reject) => {
+      this.authenticate()
+        .then(() => {
+          return this.spotifyWebApi.reorderTracksInPlaylist(
+            playlistId,
+            oldPositon,
+            position
+          )
+        })
+        .then(() => {
+          resolve()
+        })
+        .catch(error => {
+          if (error?.body?.error?.message === 'The access token expired') {
+            this.clearToekns()
+            reject(new SpotifyNotLinked())
+          } else reject(new SpotifyUnknownError())
+        })
+    })
+  }
+
+  deleteItem(playlistId: string, musicId: string) {
+    return new Promise<void>((resolve, reject) => {
+      this.authenticate()
+        .then(() => {
+          return this.spotifyWebApi.removeTracksFromPlaylist(playlistId, [
+            { uri: `spotify:track:${musicId}` }
+          ])
+        })
+        .then(() => {
+          resolve()
+        })
+        .catch(error => {
+          if (error?.body?.error?.message === 'The access token expired') {
+            this.clearToekns()
+            reject(new SpotifyNotLinked())
+          } else reject(new SpotifyUnknownError())
+        })
+    })
+  }
+
+  isAuthenticated() {
+    return new Promise<boolean>(resolve => {
+      this.authenticate()
+        .then(() => {
+          return this.spotifyWebApi.getMe()
+        })
+        .then(result => {
+          if (result.body.display_name) resolve(true)
+          else resolve(false)
+        })
+        .catch(() => {
+          resolve(false)
+        })
+    })
   }
 }

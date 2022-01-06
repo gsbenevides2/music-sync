@@ -28,4 +28,9 @@ export class SpotifyAuthController {
         }
       })
   }
+
+  async isAuthenticated(_: Request, res: Response) {
+    const result = await spotifyAuthModel.isAuthenticated()
+    res.send({ result })
+  }
 }
