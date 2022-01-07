@@ -100,7 +100,7 @@ export class PlaylistController {
       .then(musics => {
         if (musics.length) res.json(musics)
         else {
-          const error = new NotFoundPlaylists()
+          const error = new NotFoundMusics()
           res.status(error.status).json(error.toJson())
         }
       })
@@ -123,7 +123,7 @@ export class PlaylistController {
       .then(playlists => {
         if (playlists.length) res.json(playlists)
         else {
-          const error = new NotFoundMusics()
+          const error = new NotFoundPlaylists()
           res.status(error.status).json(error.toJson())
         }
       })
