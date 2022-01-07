@@ -1,26 +1,40 @@
-import React from "react";
+import React from 'react'
 
-export function useArrayState<T>(initialState:T[]):[
-    T[],
-    React.Dispatch<React.SetStateAction<T[]>>,
-    (appendArray: T[], equalsFunction: (a: T, b: T) => boolean) => void
-]{
-    const [array,setArray] =  React.useState<T[]>(initialState)
+interface Options<T> {
+  initialState: T[]
+  orderingFunction?: (array: T[]) => T[]
+}
 
-    const appendToArray = React.useCallback((appendArray:T[],equalsFunction:(a:T,b:T)=>boolean)=>{
-        setArray(array=>{
+type Returned<T> = [
+  T[],
+  React.Dispatch<React.SetStateAction<T[]>>,
+  (appendArray: T[], equalsFunction: (a: T, b: T) => boolean) => void
+]
+
+export function useArrayState<T>(options: Options<T>): Returned<T> {
+  const [array, setArray] = React.useState<T[]>(options.initialState)
+
+  const appendToArray = React.useCallback(
+    (appendArray: T[], equalsFunction: (a: T, b: T) => boolean) => {
+      setArray(array => {
         const newArray = [...array]
-        for(const appendValue of appendArray){
-            const indexTest = newArray.findIndex(value=>equalsFunction(value,appendValue))
-            if(indexTest === -1){
-                newArray.push(appendValue)
-            }else {
-                newArray[indexTest] = appendValue
-            }
+        for (const appendValue of appendArray) {
+          const indexTest = newArray.findIndex(value =>
+            equalsFunction(value, appendValue)
+          )
+          if (indexTest === -1) {
+            newArray.push(appendValue)
+          } else {
+            newArray[indexTest] = appendValue
+          }
         }
-        return newArray
-    })
-    },[])
-    
-    return [array,setArray,appendToArray]
+        if (options.orderingFunction) {
+          return options.orderingFunction(newArray)
+        } else return newArray
+      })
+    },
+    []
+  )
+
+  return [array, setArray, appendToArray]
 }

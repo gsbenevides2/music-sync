@@ -49,6 +49,16 @@ const screens = {
     title: 'Controle de Prioridade de Recursos na Rede',
     showMenu: false,
     showBack: true
+  },
+  '/dashboard/settings/plataformSync': {
+    title: 'Sincronização Spotify e Youtube',
+    showMenu: false,
+    showBack: true
+  },
+  '/dashboard/createPlaylist': {
+    title: 'Criar Playlist',
+    showMenu: false,
+    showBack: true
   }
 }
 

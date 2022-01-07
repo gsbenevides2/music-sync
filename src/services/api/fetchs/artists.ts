@@ -6,7 +6,7 @@ import {
   AddEventListenerOptions,
   EspecialEventListenerOrEventListenerObject
 } from './types'
-import { getNetworkState, NetworkState, orderByName } from './utils'
+import { getNetworkState, NetworkState } from './utils'
 
 export class FetchArtists extends EventTarget {
   networkState: NetworkState
@@ -28,13 +28,11 @@ export class FetchArtists extends EventTarget {
     while (true) {
       try {
         const result = await this.fetchFromApi(page)
-
-        const ordenedResult = await orderByName<Artist>(result)
         const dataEvent = new CustomEvent<Artist[]>('data', {
-          detail: ordenedResult
+          detail: result
         })
         this.dispatchEvent(dataEvent)
-        await this.saveInDb(ordenedResult)
+        await this.saveInDb(result)
         page++
       } catch (error: any) {
         const code: string =
@@ -62,10 +60,8 @@ export class FetchArtists extends EventTarget {
 
   private async goToDbOnly() {
     const result = await this.fetchFromDb()
-
-    const ordenedResult = await orderByName<Artist>(result)
     const dataEvent = new CustomEvent<Artist[]>('data', {
-      detail: ordenedResult
+      detail: result
     })
     this.dispatchEvent(dataEvent)
   }

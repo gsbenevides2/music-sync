@@ -5,16 +5,17 @@ import { useParams } from 'react-router-dom'
 import LaggerList from '../../components/LaggerList'
 import { useMessage } from '../../components/Message/index.'
 import { ScreenContainer } from '../../components/ScreenContainer'
+import { EmptyScreen } from '../../components/ScreenMessager/EmptyScreen'
+import { LoadingScreen } from '../../components/ScreenMessager/LoadingScreen'
+import { NotFoundScreen } from '../../components/ScreenMessager/NotFoundScreen'
+import { OfflineScreen } from '../../components/ScreenMessager/OfflineScreen'
+import { ServerErrorScreen } from '../../components/ScreenMessager/ServerErrorScreen'
 import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
 import { FetchMusics } from '../../services/api/fetchs/musics'
+import { orderByPropety } from '../../utils/orderByProperty'
 import { useArrayState } from '../../utils/useArrayState'
-import { ErrorState } from '../Dashboard/errorState'
-import { LoadingState } from '../Dashboard/loadingState'
-import { OfflineState } from '../Dashboard/offlineState'
-import { AlbumNotFound } from './albumNotFound'
-import { EmptyAlbumState } from './emptyAlbumState'
 
 // import { MusicsResponse } from '../../services/api.types'
 
@@ -29,7 +30,10 @@ type PageState =
 type Params = { id: string }
 
 export const ArtistScreen: React.FC = () => {
-  const [musics, , appendMusics] = useArrayState<MusicWithArtistAndAlbum>([])
+  const [musics, , appendMusics] = useArrayState<MusicWithArtistAndAlbum>({
+    initialState: [],
+    orderingFunction: array => orderByPropety(array, 'name')
+  })
   const [artistName, setArtistName] = React.useState<string>()
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const playerContext = React.useContext(PlayerContext)
@@ -73,35 +77,6 @@ export const ArtistScreen: React.FC = () => {
     )
 
     fetcher.start()
-    /*
-    function loadMusics(page: number) {
-      if (!id) return
-      fetchMusicsByArtist(page, id, true, true)
-        .then(musicsFetched => {
-          setPageState('Loaded')
-          setArtistName(musicsFetched[0].artist.name)
-          appendMusics(musicsFetched, (a, b) => a.id === b.id)
-          if (musicsFetched.length === 10) loadMusics(page + 1)
-        })
-        .catch(e => {
-          const code = e.response?.data?.code || e.code || ''
-          if (code === 'Offline') setPageState('Offline')
-          else if (code === 'NotMoreError') setPageState('Loaded')
-          else if (code === 'SessionNotFound' || code === 'TokenInvalid')
-            showMessage(code)
-          else if (page === 0 && code === 'NotFoundMusics')
-            setPageState('EmptyArtist')
-          else if (page > 0 && code !== 'NotFoundMusics')
-            showMessage('NotLoadAllMusics')
-          else if (page > 0 && code === 'NotFoundMusics') setPageState('Loaded')
-          else if (code === 'ArtistNotExists') {
-            setArtistName('Artista não existe')
-            setPageState('ArtistNotFound')
-          } else setPageState('Error')
-        })
-    }
-    loadMusics(0)
-    */
   }, [id])
 
   const musicCallback = React.useCallback(
@@ -119,11 +94,13 @@ export const ArtistScreen: React.FC = () => {
   }, [artistName])
 
   let Content
-  if (pageState === 'Loading') Content = <LoadingState />
-  else if (pageState === 'Offline') Content = <OfflineState />
-  else if (pageState === 'EmptyArtist') Content = <EmptyAlbumState />
-  else if (pageState === 'Error') Content = <ErrorState />
-  else if (pageState === 'ArtistNotFound') Content = <AlbumNotFound />
+  if (pageState === 'Loading') Content = <LoadingScreen />
+  else if (pageState === 'Offline') Content = <OfflineScreen />
+  else if (pageState === 'EmptyArtist')
+    Content = <EmptyScreen text="Este artista não tem músicas!" />
+  else if (pageState === 'Error') Content = <ServerErrorScreen />
+  else if (pageState === 'ArtistNotFound')
+    Content = <NotFoundScreen text="Esse artista não foi encontrado!" />
   else if (pageState === 'Loaded') {
     Content = (
       <LaggerList
@@ -136,6 +113,8 @@ export const ArtistScreen: React.FC = () => {
           }
         })}
         onClick={musicCallback}
+        minimal
+        lowerMargin
       />
     )
   }
@@ -145,7 +124,7 @@ export const ArtistScreen: React.FC = () => {
       <Helmet>
         <title>{artistName || 'Carregando Artista'}</title>
       </Helmet>
-   
+
       <br />
       {Content}
     </ScreenContainer>

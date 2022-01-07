@@ -5,7 +5,6 @@ import Header from './components/Header'
 import Player from './components/Player'
 import { MusicListContextProvider } from './contexts/MusicList'
 import { PlayerContextProvider } from './contexts/Player'
-import AddMusicScreen from './pages/AddMusic'
 import { AlbumScreen } from './pages/Album'
 import AlbumsScreen from './pages/Albums'
 import { ArtistScreen } from './pages/Artist'
@@ -14,7 +13,12 @@ import AuthCallback from './pages/AuthCallback'
 import DashboardScreen from './pages/Dashboard'
 import HomeScreen from './pages/Home'
 import SettingsScreen from './pages/Settings'
+import AddMusicScreen from './pages/Settings/addMusic'
+import { CreatePlaylistScreen } from './pages/Settings/createPlaylist'
 import { ResourceManagerScreen } from './pages/Settings/resourceMamager'
+import { SocialAuthManagerScreen } from './pages/Settings/socialAuthManager'
+import SpotifyCallback from './pages/SpotifyCallback'
+import YoutubeCallback from './pages/YoutubeCallback'
 
 const DashboardLayout: React.FC = props => {
   return (
@@ -36,6 +40,8 @@ const Routes: React.FC = () => {
       <Switch>
         <Route path="/" exact component={HomeScreen} />
         <Route path="/authCallback" exact component={AuthCallback} />
+        <Route path="/spotifyAuth/callback" exact component={SpotifyCallback} />
+        <Route path="/youtubeAuth/callback" exact component={YoutubeCallback} />
         <DashboardLayout>
           <Route path="/dashboard" exact component={DashboardScreen} />
           <Route path="/dashboard/albums" exact component={AlbumsScreen} />
@@ -43,7 +49,21 @@ const Routes: React.FC = () => {
           <Route path="/dashboard/artists" exact component={ArtistsScreen} />
           <Route path="/dashboard/artist/:id" exact component={ArtistScreen} />
           <Route path="/dashboard/settings" exact component={SettingsScreen} />
-          <Route path="/dashboard/settings/resourceManager" exact component={ResourceManagerScreen} />
+          <Route
+            path="/dashboard/settings/resourceManager"
+            exact
+            component={ResourceManagerScreen}
+          />
+          <Route
+            path="/dashboard/settings/plataformSync"
+            exact
+            component={SocialAuthManagerScreen}
+          />
+          <Route
+            path="/dashboard/createPlaylist"
+            exact
+            component={CreatePlaylistScreen}
+          />
           <Route path="/dashboard/addMusic" exact component={AddMusicScreen} />
         </DashboardLayout>
       </Switch>

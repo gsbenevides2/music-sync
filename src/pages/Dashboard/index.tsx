@@ -5,15 +5,16 @@ import LaggerList from '../../components/LaggerList'
 import { useMessage } from '../../components/Message/index.'
 import Modal, { ModalEvents, useModal } from '../../components/Modal'
 import { ScreenContainer } from '../../components/ScreenContainer'
+import { EmptyScreen } from '../../components/ScreenMessager/EmptyScreen'
+import { LoadingScreen } from '../../components/ScreenMessager/LoadingScreen'
+import { OfflineScreen } from '../../components/ScreenMessager/OfflineScreen'
+import { ServerErrorScreen } from '../../components/ScreenMessager/ServerErrorScreen'
 import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
 import { FetchMusics } from '../../services/api/fetchs/musics'
+import { orderByPropety } from '../../utils/orderByProperty'
 import { useArrayState } from '../../utils/useArrayState'
-import { EmptyState } from './emptyState'
-import { ErrorState } from './errorState'
-import { LoadingState } from './loadingState'
-import { OfflineState } from './offlineState'
 
 // import { MusicsResponse } from '../../services/api.types'
 
@@ -21,7 +22,10 @@ type PageState = 'Loading' | 'Empty' | 'Error' | 'Loaded' | 'Offline'
 
 const DashboardScreen: React.FC = () => {
   const modal = useModal(['AddToPlaylist', 'DeleteMusic'])
-  const [musics, , appendMusics] = useArrayState<MusicWithArtistAndAlbum>([])
+  const [musics, , appendMusics] = useArrayState<MusicWithArtistAndAlbum>({
+    initialState: [],
+    orderingFunction: array => orderByPropety(array, 'name')
+  })
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const playerContext = React.useContext(PlayerContext)
   const musicListContext = React.useContext(MusicListContext)
@@ -83,10 +87,13 @@ const DashboardScreen: React.FC = () => {
   }, [])
 
   let Content
-  if (pageState === 'Loading') Content = <LoadingState />
-  else if (pageState === 'Offline') Content = <OfflineState />
-  else if (pageState === 'Empty') Content = <EmptyState />
-  else if (pageState === 'Error') Content = <ErrorState />
+  if (pageState === 'Loading') Content = <LoadingScreen />
+  else if (pageState === 'Offline') Content = <OfflineScreen />
+  else if (pageState === 'Empty')
+    Content = (
+      <EmptyScreen text="Você ainda não adicionou músicas.\nTente ir nas configurações!" />
+    )
+  else if (pageState === 'Error') Content = <ServerErrorScreen />
   else if (pageState === 'Loaded') {
     Content = (
       <LaggerList

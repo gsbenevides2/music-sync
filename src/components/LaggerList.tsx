@@ -13,13 +13,20 @@ interface Props {
   listOfItems: LaggerListItem[]
   onClick?: (id: string) => void
   onRightClick?: (id: string) => void
+  minimal?: boolean
+  lowerMargin?: boolean
 }
 
 const LaggerList: React.FC<Props> = props => {
   return (
     <ul
-      className="flex flex-auto flex-wrap gap-3 justify-center"
-      style={{ maxWidth: '800px' }}
+      className="flex flex-auto flex-wrap gap-3 justify-center overflow-y-auto hiden-scroll py-1"
+      style={{
+        maxWidth: '800px',
+        height: `calc(100vh - (0.75rem + ${
+          (props.minimal ? 28 : 90) + (props.lowerMargin ? 4 : 12)
+        }px + var(--player-height) + 0.50rem))`
+      }}
     >
       {props.listOfItems.map(item => (
         <li

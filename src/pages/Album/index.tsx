@@ -5,16 +5,17 @@ import { useParams } from 'react-router-dom'
 import LaggerList from '../../components/LaggerList'
 import { useMessage } from '../../components/Message/index.'
 import { ScreenContainer } from '../../components/ScreenContainer'
+import { EmptyScreen } from '../../components/ScreenMessager/EmptyScreen'
+import { LoadingScreen } from '../../components/ScreenMessager/LoadingScreen'
+import { NotFoundScreen } from '../../components/ScreenMessager/NotFoundScreen'
+import { OfflineScreen } from '../../components/ScreenMessager/OfflineScreen'
+import { ServerErrorScreen } from '../../components/ScreenMessager/ServerErrorScreen'
 import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
 import { FetchMusics } from '../../services/api/fetchs/musics'
+import { orderByPropety } from '../../utils/orderByProperty'
 import { useArrayState } from '../../utils/useArrayState'
-import { ErrorState } from '../Dashboard/errorState'
-import { LoadingState } from '../Dashboard/loadingState'
-import { OfflineState } from '../Dashboard/offlineState'
-import { AlbumNotFound } from './albumNotFound'
-import { EmptyAlbumState } from './emptyAlbumState'
 
 // import { MusicsResponse } from '../../services/api.types'
 
@@ -29,7 +30,10 @@ type PageState =
 type Params = { id: string }
 
 export const AlbumScreen: React.FC = () => {
-  const [musics, , appendMusics] = useArrayState<MusicWithArtistAndAlbum>([])
+  const [musics, , appendMusics] = useArrayState<MusicWithArtistAndAlbum>({
+    initialState: [],
+    orderingFunction: array => orderByPropety(array, 'name')
+  })
   const [albumName, setAlbumName] = React.useState<string>()
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const playerContext = React.useContext(PlayerContext)
@@ -90,11 +94,13 @@ export const AlbumScreen: React.FC = () => {
   }, [albumName])
 
   let Content
-  if (pageState === 'Loading') Content = <LoadingState />
-  else if (pageState === 'Offline') Content = <OfflineState />
-  else if (pageState === 'EmptyAlbum') Content = <EmptyAlbumState />
-  else if (pageState === 'Error') Content = <ErrorState />
-  else if (pageState === 'AlbumNotFound') Content = <AlbumNotFound />
+  if (pageState === 'Loading') Content = <LoadingScreen />
+  else if (pageState === 'Offline') Content = <OfflineScreen />
+  else if (pageState === 'EmptyAlbum')
+    Content = <EmptyScreen text="Este album não tem músicas." />
+  else if (pageState === 'Error') Content = <ServerErrorScreen />
+  else if (pageState === 'AlbumNotFound')
+    Content = <NotFoundScreen text="Esse album não existe!" />
   else if (pageState === 'Loaded') {
     Content = (
       <LaggerList
@@ -107,6 +113,8 @@ export const AlbumScreen: React.FC = () => {
           }
         })}
         onClick={musicCallback}
+        minimal
+        lowerMargin
       />
     )
   }
@@ -116,7 +124,7 @@ export const AlbumScreen: React.FC = () => {
       <Helmet>
         <title>{albumName || 'Carregando Album'}</title>
       </Helmet>
-      
+
       <br />
       {Content}
     </ScreenContainer>

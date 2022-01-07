@@ -5,20 +5,24 @@ import { useHistory } from 'react-router-dom'
 import LaggerList from '../../components/LaggerList'
 import { useMessage } from '../../components/Message/index.'
 import { ScreenContainer } from '../../components/ScreenContainer'
+import { EmptyScreen } from '../../components/ScreenMessager/EmptyScreen'
+import { LoadingScreen } from '../../components/ScreenMessager/LoadingScreen'
+import { OfflineScreen } from '../../components/ScreenMessager/OfflineScreen'
+import { ServerErrorScreen } from '../../components/ScreenMessager/ServerErrorScreen'
 import { Artist } from '../../services/api/apiTypes'
 import { FetchArtists } from '../../services/api/fetchs/artists'
+import { orderByPropety } from '../../utils/orderByProperty'
 import { useArrayState } from '../../utils/useArrayState'
-import { ErrorState } from '../Dashboard/errorState'
-import { LoadingState } from '../Dashboard/loadingState'
-import { OfflineState } from '../Dashboard/offlineState'
-import { EmptyState } from './emptyState'
 
 // import { MusicsResponse } from '../../services/api.types'
 
 type PageState = 'Loading' | 'Empty' | 'Error' | 'Loaded' | 'Offline'
 
 const ArtistsScreen: React.FC = () => {
-  const [artists, , appendArtists] = useArrayState<Artist>([])
+  const [artists, , appendArtists] = useArrayState<Artist>({
+    initialState: [],
+    orderingFunction: array => orderByPropety(array, 'name')
+  })
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const history = useHistory()
 
@@ -59,10 +63,11 @@ const ArtistsScreen: React.FC = () => {
   }, [])
 
   let Content
-  if (pageState === 'Loading') Content = <LoadingState />
-  else if (pageState === 'Offline') Content = <OfflineState />
-  else if (pageState === 'Empty') Content = <EmptyState />
-  else if (pageState === 'Error') Content = <ErrorState />
+  if (pageState === 'Loading') Content = <LoadingScreen />
+  else if (pageState === 'Offline') Content = <OfflineScreen />
+  else if (pageState === 'Empty')
+    Content = <EmptyScreen text="Você não tem artistas!" />
+  else if (pageState === 'Error') Content = <ServerErrorScreen />
   else if (pageState === 'Loaded') {
     Content = (
       <LaggerList

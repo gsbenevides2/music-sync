@@ -5,7 +5,7 @@ import {
   MdCellWifi,
   MdLogout,
   MdPlaylistAdd,
-  MdShare
+  MdSync
 } from 'react-icons/md'
 import { useHistory } from 'react-router'
 
@@ -26,16 +26,17 @@ function SettingsScreen() {
       onClick: () => pushToScreen('/dashboard/addMusic')
     },
     {
-      title: 'Autenticar Spotify e Youtube',
-      icon: MdShare,
-      description: 'Autentique com spotify e youtube'
-      // onClick:()=>
+      title: 'Sincronização Spotify e Youtube',
+      icon: MdSync,
+      description: 'Sincronize as playlists com o Spotify e Youtube',
+      onClick:()=> pushToScreen('/dashboard/settings/plataformSync')
     },
     {
       title: 'Criar Playlist',
       icon: MdPlaylistAdd,
-      description: 'Criar uma nova playlist.'
-      // onClick:()=>
+      description: 'Criar uma nova playlist.',
+      onClick: () => pushToScreen('/dashboard/createPlaylist')
+     
     },
     {
       title: 'Controle de Prioridade de Recursos na Rede',

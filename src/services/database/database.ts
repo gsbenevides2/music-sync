@@ -1,13 +1,20 @@
+import { getSettingString, setSetting } from '../../utils/settings'
 import { runVersion1 } from './upgrades/version1'
+import { runVersion2 } from './upgrades/version2'
 
 export class DatabaseManager {
   db?: IDBDatabase
+  version = 2
+  migrations = [runVersion1, runVersion2]
+
   open() {
     return new Promise<void>(resolve => {
-      const dbRequest = window.indexedDB.open('Music-Sync', 1)
+      const dbRequest = window.indexedDB.open('Music-Sync', this.version)
       dbRequest.onupgradeneeded = e => {
         this.db = dbRequest.result
-        this.upgradeDb()
+
+        const upgradeTransaction = dbRequest.transaction
+        this.upgradeDb(upgradeTransaction as IDBTransaction)
       }
       dbRequest.onsuccess = () => {
         this.db = dbRequest.result
@@ -16,8 +23,20 @@ export class DatabaseManager {
     })
   }
 
-  upgradeDb() {
-    runVersion1(this.db as IDBDatabase)
+  upgradeDb(upgradeTransaction: IDBTransaction) {
+    if (!this.db?.objectStoreNames.contains('musics')) {
+      runVersion1(upgradeTransaction)
+      console.log('foi')
+    }
+
+    let nextVersion = (Number(getSettingString('DBVersion')) | 1) + 1
+    console.log('lb', nextVersion)
+    for (; nextVersion <= this.version; nextVersion++) {
+      console.log('la', nextVersion)
+      this.migrations[nextVersion - 1](upgradeTransaction)
+    }
+    console.log('li')
+    setSetting('DBVersion', this.version.toString())
   }
 
   addObject(object: any, storeName: string) {
@@ -51,6 +70,20 @@ export class DatabaseManager {
         })
       })
     )
+  }
+
+  getObject(storeName: string, id: string) {
+    const db = this.db
+    if (db === undefined) throw new Error('Please call open()')
+
+    const store = db.transaction(storeName, 'readwrite').objectStore(storeName)
+
+    return new Promise<any>(resolve => {
+      const request = store.get(id)
+      request.onsuccess = () => {
+        resolve(request.result)
+      }
+    })
   }
 
   getObjects(storeName: string) {
