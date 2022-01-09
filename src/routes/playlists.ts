@@ -15,6 +15,13 @@ playlistsRoutes.get(
   authController.authenticate,
   playlistController.list
 )
+playlistsRoutes.get(
+  '/playlist/:playlistId',
+  authValidantion.authenticate,
+  authController.authenticate,
+  playlistsValidation.get,
+  playlistController.get
+)
 
 playlistsRoutes.post(
   '/playlist',

@@ -30,6 +30,11 @@ export const playlistsValidation = {
       musicId: Joi.string().required()
     }
   }),
+  get: celebrate({
+    query: {
+      // playlistId: Joi.string().required()
+    }
+  }),
   deletePlaylist: celebrate({
     query: {
       playlistId: Joi.string().required()

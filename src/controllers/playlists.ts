@@ -3,6 +3,7 @@ import { Request, Response } from 'express'
 import { MusicsModel } from '../models/musics'
 import { PlaylistsModel } from '../models/playlists'
 import { AppError } from '../utils/errors/AppError'
+import { NotFoundPlaylist } from '../utils/errors/NotFoundPlaylist'
 import { NotFoundPlaylists } from '../utils/errors/NotFoundPlaylists'
 import { UnknownError } from '../utils/errors/UnknownError'
 
@@ -126,6 +127,30 @@ export class PlaylistController {
           res.status(error.status).json(error.toJson())
         } else {
           console.log(error)
+          const unknownError = new UnknownError()
+          res.status(unknownError.status).json(unknownError.toJson())
+        }
+      })
+  }
+
+  async get(req: Request, res: Response) {
+    const id = req.params.playlistId as string
+    const playlistModel = new PlaylistsModel({})
+
+    playlistModel
+      .get(id)
+      .then(playlist => {
+        if (playlist) res.json(playlist)
+        else {
+          const error = new NotFoundPlaylist()
+          res.status(error.status).json(error.toJson())
+        }
+      })
+      .catch(error => {
+        console.log(error)
+        if (error instanceof AppError) {
+          res.status(error.status).json(error.toJson())
+        } else {
           const unknownError = new UnknownError()
           res.status(unknownError.status).json(unknownError.toJson())
         }
