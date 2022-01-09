@@ -1,9 +1,10 @@
 import React from 'react'
+import { Helmet } from 'react-helmet'
 import { MdClose, MdDone } from 'react-icons/md'
 
-import { useMessage } from '../../components/Message/index.'
 import { OptionsItem, OptionsList } from '../../components/OptionsList'
 import { ScreenContainer } from '../../components/ScreenContainer'
+import { useMessage } from '../../contexts/Message/index.'
 import api from '../../services/api/api'
 import { getSettingString, setSetting } from '../../utils/settings'
 import { AUTH_WAITING_KEY } from '../../utils/settings/keys'
@@ -78,6 +79,9 @@ export const SocialAuthManagerScreen: React.FC = () => {
 
   return (
     <ScreenContainer minimal lowerMargin>
+      <Helmet>
+        <title>Music Sync - Sincronização Spotify e Youtube</title>
+      </Helmet>
       <OptionsList items={items} ulClassName="w-screen" />
     </ScreenContainer>
   )

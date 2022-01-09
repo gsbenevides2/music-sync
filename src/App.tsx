@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { MessageProvider } from './components/Message/index.'
+import { MessageProvider } from './contexts/Message/index.'
 import Routes from './routes'
 
 const App: React.FC = () => {

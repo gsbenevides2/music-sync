@@ -2,8 +2,7 @@ import React from 'react'
 import {
   // MdPlayArrow,
   MdSkipNext,
-  MdSkipPrevious
-  // MdArrowDropDown,
+  MdSkipPrevious // MdArrowDropDown,
 } from 'react-icons/md'
 import { usePalette } from 'react-palette'
 import { useSpring, animated as Animated } from 'react-spring'
@@ -15,8 +14,9 @@ import CircleButton from '../CircleButton'
 import { ImageSpecial } from '../ImageSpecial'
 import MediumList from '../MeddiumList'
 import { PlayAndPauseMemoButton } from './playAndPauseButton'
-import { ProgressMemo } from './progress'
+import { DurationBarMemo } from './progress'
 import { TooglePlaylistMemoButton } from './tooglePlaylistButton'
+import { VolumeBarMemo } from './volume'
 
 const Player: React.FC = () => {
   const playerContext = React.useContext(PlayerContext)
@@ -87,7 +87,7 @@ const Player: React.FC = () => {
       {playerContext.actualMusic ? (
         <>
           <div className="bottombar  px-4 " style={{ height: playerHeight }}>
-            <ProgressMemo
+            <DurationBarMemo
               playedColor={vibrantColors.data.lightVibrant || 'blue'}
               thumbColor={vibrantColors.data.vibrant || 'darkblue'}
               disabled={playerContext.waiting}
@@ -135,6 +135,17 @@ const Player: React.FC = () => {
               </div>
             </div>
           </div>
+          <div className="flex justify-center">
+            <div className=" px-4  max-w-sm w-full items-center">
+              <VolumeBarMemo
+                end={1}
+                position={playerContext.volume}
+                playedColor={vibrantColors.data.lightVibrant || 'blue'}
+                thumbColor={vibrantColors.data.vibrant || 'darkblue'}
+                setPosition={playerContext.volumeChange}
+              />
+            </div>
+          </div>
           <h2 className="p-2">Lista de Reprodução Atual:</h2>
           <MediumList
             listOfItems={musicListContext.musicList.map(music => {
@@ -147,7 +158,7 @@ const Player: React.FC = () => {
             })}
             ulClassName="overflow-y-scroll hiden-scroll"
             ulStyle={{
-              height: `calc(100vh - ${playerHeight + 40}px)`
+              height: `calc(100vh - ${playerHeight + 40 + 24}px)`
             }}
             onClick={musicId => {
               const music = musicListContext.musicList.find(
@@ -167,54 +178,18 @@ const Player: React.FC = () => {
 export default Player
 
 /*
-  <div className="flex justify-between">
-        <div className="flex ml-1">
-          <img
-            src={playerContext.actualMusic?.album.spotifyCoverUrl}
-            style={{ height: `calc(${playerHeight}px - 1.95rem)` }}
-          />
-          <div className="flex flex-col m-1">
-            <span className="text-sm font-bold">
-              {playerContext.actualMusic?.name}
-            </span>
-            <span className="text-sm">
-              {' '}
-              {playerContext.actualMusic?.artist.name}
-            </span>
-          </div>
-        </div>
-        <div className="self-center grid grid-cols-4 gap-1 pr-4">
-          <CircleButton onClick={playCallback} small>
-            {openActualPlaying ? <MdArrowDropDown /> : <MdQueueMusic />}
-          </CircleButton>
-          <CircleButton onClick={() => {}}>
-            <MdSkipPrevious />
-          </CircleButton>
-          <CircleButton primary onClick={() => {}}>
-            {!playerContext?.playing ? <MdPlayArrow /> : <MdPause />}
-          </CircleButton>
-          <CircleButton onClick={() => {}}>
-            <MdSkipNext />
-          </CircleButton>
-        </div>
-      </div>
-      <br />
-      <h2 className="p-2">Lista de Reprodução Atual:</h2>
-      <ul>
-        <li className="flex justify-between hover:bg-gray-800 pointer p-2">
-          <div className="flex">
-            <img
-              src={playerContext.actualMusic?.album.spotifyCoverUrl}
-              style={{ height: 'calc(10vh)' }}
-            />
-            <div className="flex flex-col m-1">
-              <span>{playerContext.actualMusic?.name}</span>
-              <span className="text-sm">
-                {playerContext.actualMusic?.artist.name}
-              </span>
+    <div className="grid px-4 grid-cols-7 max-w-sm items-center">
+              <VolumeBarMemo
+                end={1}
+                position={playerContext.volume}
+                playedColor={vibrantColors.data.lightVibrant || 'blue'}
+                thumbColor={vibrantColors.data.vibrant || 'darkblue'}
+                setPosition={playerContext.volumeChange}
+              />
             </div>
-          </div>
-          <div className="self-center grid grid-cols-4 gap-1 pr-4"></div>
-        </li>
-      </ul>
+              <div className="flex items-center col-span-2 justify-around">
+                <MdShuffle className="cursor-pointer" size="1.5em" />
+                <MdStop className="cursor-pointer" size="1.5em" />
+                <MdShortText className="cursor-pointer" size="1.5em" />
+              </div>
 */

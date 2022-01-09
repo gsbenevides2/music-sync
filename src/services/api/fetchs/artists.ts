@@ -1,4 +1,4 @@
-import { DatabaseManager } from '../../database/database'
+import { getDatabase } from '../../database'
 import api from '../api'
 import { Artist } from '../apiTypes'
 import {
@@ -10,6 +10,8 @@ import { getNetworkState, NetworkState } from './utils'
 
 export class FetchArtists extends EventTarget {
   networkState: NetworkState
+  apiResult:Artist[] = []
+  dbResult:Artist[] = []
   constructor() {
     super()
     this.networkState = getNetworkState()
@@ -21,10 +23,17 @@ export class FetchArtists extends EventTarget {
     if (networkState === 'api only') this.goToApiOnly()
     else if (networkState === 'db first') this.goToDbFirst()
     else if (networkState === 'db only') this.goToDbOnly()
+    else if (networkState === 'offline') this.networkError()
+  }
+
+  private networkError() {
+    const dataEvent = new CustomEvent<string>('error', { detail: 'Offline' })
+    this.dispatchEvent(dataEvent)
   }
 
   private async goToApiOnly() {
     let page = 0
+    let save = false
     while (true) {
       try {
         const result = await this.fetchFromApi(page)
@@ -32,12 +41,15 @@ export class FetchArtists extends EventTarget {
           detail: result
         })
         this.dispatchEvent(dataEvent)
-        await this.saveInDb(result)
+        this.apiResult = [...this.apiResult,...result]
         page++
       } catch (error: any) {
         const code: string =
           error.code || error.response?.data?.code || 'Unknoow Error'
-        if (code === 'NotFoundArtists' && page > 0) break
+        if (code === 'NotFoundArtists' && page > 0){
+          save = true
+          break
+        }
         else if (this.networkState === 'db first' || page > 0) {
           const dataEvent = new CustomEvent<string>('error', {
             detail: 'NotLoadAllArtists'
@@ -51,6 +63,7 @@ export class FetchArtists extends EventTarget {
         }
       }
     }
+    if(save) await this.saveInDb()
   }
 
   private async goToDbFirst() {
@@ -83,18 +96,39 @@ export class FetchArtists extends EventTarget {
   }
 
   private async fetchFromDb(): Promise<Artist[]> {
-    const database = new DatabaseManager()
-    await database.open()
+    const database = await getDatabase()
 
-    const albums: Artist[] = await database.getObjects('artists')
-    return albums
+    const artists: Artist[] = await database.select({
+      from: 'artists'
+    })
+    this.dbResult = artists
+    return artists
   }
 
-  private async saveInDb(albums: Artist[]) {
-    const database = new DatabaseManager()
-    await database.open()
+  private async saveInDb() {
+    const deleteValues: string[] = []
+    const updateValues: Artist[] = []
 
-    await database.addObjects(albums, 'artists')
+    this.dbResult.forEach(result => {
+      if (this.apiResult.findIndex(test => test.id === result.id) !== -1) {
+        updateValues.push(result)
+      } else deleteValues.push(result.id)
+    })
+
+    const database = await getDatabase()
+
+    await database.insert({
+      into: 'artists',
+      values: updateValues,
+      upsert: true
+    })
+
+    await database.remove({
+      from: 'artists',
+      where: {
+        id: { in: deleteValues }
+      }
+    })
   }
 
   addEventListener(

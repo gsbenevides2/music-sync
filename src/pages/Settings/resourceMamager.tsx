@@ -1,4 +1,5 @@
 import React from 'react'
+import { Helmet } from 'react-helmet'
 import { MdClose, MdDone } from 'react-icons/md'
 
 import { OptionsItem, OptionsList } from '../../components/OptionsList'
@@ -30,7 +31,10 @@ export const ResourceManagerScreen: React.FC = () => {
 
   return (
     <ScreenContainer minimal lowerMargin>
-      <OptionsList items={items} ulClassName='w-screen' />
+      <Helmet>
+        <title>Music Sync - Controle de Prioridade de Recursos na Rede</title>
+      </Helmet>
+      <OptionsList items={items} ulClassName="w-screen" />
     </ScreenContainer>
   )
 }

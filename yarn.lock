@@ -7787,6 +7787,11 @@ jsprim@^1.2.2:
     json-schema "0.2.3"
     verror "1.10.0"
 
+jsstore@^4.3.7:
+  version "4.3.7"
+  resolved "https://registry.yarnpkg.com/jsstore/-/jsstore-4.3.7.tgz#a7355afd8c42dd6913f246768418e456c5bf8e36"
+  integrity sha512-vX/kBWxq4ZqG4g1M/RBZ1hHxuWDTaKwI/oqnl9ybUsPJWCwXGFNXKzOhz9jL/Z2Q1vDsdPQSWD2H4PPVjMwwmw==
+
 "jsx-ast-utils@^2.4.1 || ^3.0.0", jsx-ast-utils@^3.1.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/jsx-ast-utils/-/jsx-ast-utils-3.2.0.tgz#41108d2cec408c3453c1bbe8a4aae9e1e2bd8f82"

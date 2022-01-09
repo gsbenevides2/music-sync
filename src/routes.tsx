@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom'
 
 import Header from './components/Header'
 import Player from './components/Player'
+import { ModalProvider } from './contexts/Modal'
 import { MusicListContextProvider } from './contexts/MusicList'
 import { PlayerContextProvider } from './contexts/Player'
 import { AlbumScreen } from './pages/Album'
@@ -12,6 +13,8 @@ import ArtistsScreen from './pages/Artists'
 import AuthCallback from './pages/AuthCallback'
 import DashboardScreen from './pages/Dashboard'
 import HomeScreen from './pages/Home'
+import { PlaylistScreen } from './pages/Playlist'
+import PlaylistsScreen from './pages/Playlists'
 import SettingsScreen from './pages/Settings'
 import AddMusicScreen from './pages/Settings/addMusic'
 import { CreatePlaylistScreen } from './pages/Settings/createPlaylist'
@@ -26,7 +29,7 @@ const DashboardLayout: React.FC = props => {
       <PlayerContextProvider>
         <div className="">
           <Header title="Um Titulo" />
-          {props.children}
+          <ModalProvider>{props.children}</ModalProvider>
           <Player />
         </div>
       </PlayerContextProvider>
@@ -45,6 +48,16 @@ const Routes: React.FC = () => {
         <DashboardLayout>
           <Route path="/dashboard" exact component={DashboardScreen} />
           <Route path="/dashboard/albums" exact component={AlbumsScreen} />
+          <Route
+            path="/dashboard/playlists"
+            exact
+            component={PlaylistsScreen}
+          />
+          <Route
+            path="/dashboard/playlist/:id"
+            exact
+            component={PlaylistScreen}
+          />
           <Route path="/dashboard/album/:id" exact component={AlbumScreen} />
           <Route path="/dashboard/artists" exact component={ArtistsScreen} />
           <Route path="/dashboard/artist/:id" exact component={ArtistScreen} />

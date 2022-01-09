@@ -2,13 +2,13 @@ import React from 'react'
 import { Helmet } from 'react-helmet'
 
 import LaggerList from '../../components/LaggerList'
-import { useMessage } from '../../components/Message/index.'
-import Modal, { ModalEvents, useModal } from '../../components/Modal'
 import { ScreenContainer } from '../../components/ScreenContainer'
 import { EmptyScreen } from '../../components/ScreenMessager/EmptyScreen'
 import { LoadingScreen } from '../../components/ScreenMessager/LoadingScreen'
 import { OfflineScreen } from '../../components/ScreenMessager/OfflineScreen'
 import { ServerErrorScreen } from '../../components/ScreenMessager/ServerErrorScreen'
+import { useMessage } from '../../contexts/Message/index.'
+import { useModal } from '../../contexts/Modal'
 import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
@@ -21,10 +21,12 @@ import { useArrayState } from '../../utils/useArrayState'
 type PageState = 'Loading' | 'Empty' | 'Error' | 'Loaded' | 'Offline'
 
 const DashboardScreen: React.FC = () => {
-  const modal = useModal(['AddToPlaylist', 'DeleteMusic'])
-  const [musics, , appendMusics] = useArrayState<MusicWithArtistAndAlbum>({
+  const modal = useModal()
+
+  const musicsArray = useArrayState<MusicWithArtistAndAlbum>({
     initialState: [],
-    orderingFunction: array => orderByPropety(array, 'name')
+    orderingFunction: array => orderByPropety(array, 'name'),
+    equalsFunction: (a, b) => a.id === b.id
   })
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const playerContext = React.useContext(PlayerContext)
@@ -44,7 +46,7 @@ const DashboardScreen: React.FC = () => {
       event => {
         const musicsFetched = event.detail
         setPageState('Loaded')
-        appendMusics(musicsFetched, (a, b) => a.id === b.id)
+        musicsArray.append(musicsFetched)
       },
       { signal: abort.signal }
     )
@@ -68,22 +70,17 @@ const DashboardScreen: React.FC = () => {
 
   const onClickCallback = React.useCallback(
     (id: string) => {
-      const music = musics.find(music => music.id === id)
+      const music = musicsArray.value.find(music => music.id === id)
       if (!music || !playerContext) return
       playerContext.playMusic(music)
-      musicListContext?.setMusicList(musics)
+      musicListContext?.setMusicList(musicsArray.value)
     },
-    [musics]
+    [musicsArray.value]
   )
-  const onRightClick = React.useCallback(
-    (id: string) => {
-      modal.setOpen(true)
-    },
-    [musics]
-  )
-
-  const onModalEvent = React.useCallback((event: ModalEvents) => {
-    console.log(event)
+  const onRightClick = React.useCallback((id: string) => {
+    modal.openModal(id, ['AddToPlaylist', 'DeleteMusic'], () => {
+      musicsArray.delete({ id } as MusicWithArtistAndAlbum)
+    })
   }, [])
 
   let Content
@@ -97,7 +94,7 @@ const DashboardScreen: React.FC = () => {
   else if (pageState === 'Loaded') {
     Content = (
       <LaggerList
-        listOfItems={musics.map(music => {
+        listOfItems={musicsArray.value.map(music => {
           return {
             id: music.id,
             title: music.name,
@@ -116,7 +113,7 @@ const DashboardScreen: React.FC = () => {
       <Helmet>
         <title>Music Sync - Dashboard</title>
       </Helmet>
-      <Modal {...modal.props} onEvent={onModalEvent} />
+
       {Content}
     </ScreenContainer>
   )

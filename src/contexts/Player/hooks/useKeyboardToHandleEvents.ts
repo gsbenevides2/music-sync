@@ -6,21 +6,26 @@ export function useKeyboardToHandleEvents(
   audio: React.MutableRefObject<HTMLAudioElement>,
   actualMusic: MusicWithArtistAndAlbum | undefined,
   nextMusic: () => void,
-  previousMusic: () => void
+  previousMusic: () => void,
+  volumeUp: () => void,
+  volumeDown: () => void
 ) {
   React.useEffect(() => {
     if (!actualMusic) return () => {}
 
     const abortController = new AbortController()
     window.addEventListener(
-      'keypress',
+      'keydown',
       e => {
         const keyCode = e.code
+        console.log('keycode', keyCode)
         if (e.code === 'Space') {
           if (audio.current.paused) audio.current.play()
           else audio.current.pause()
-        } else if (keyCode === 'KeyP') previousMusic()
-        else if (keyCode === 'KeyN') nextMusic()
+        } else if (keyCode === 'ArrowRight') previousMusic()
+        else if (keyCode === 'ArrowLeft') nextMusic()
+        else if (keyCode === 'ArrowUp') volumeUp()
+        else if (keyCode === 'ArrowDown') volumeDown()
       },
       { signal: abortController.signal }
     )
@@ -28,5 +33,5 @@ export function useKeyboardToHandleEvents(
     return () => {
       abortController.abort()
     }
-  }, [actualMusic])
+  }, [actualMusic,volumeUp])
 }

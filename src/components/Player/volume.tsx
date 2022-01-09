@@ -1,30 +1,19 @@
 import React from 'react'
+import { MdVolumeUp } from 'react-icons/md'
 import { Range, getTrackBackground } from 'react-range'
 
 interface Props {
   position: number
   end: number
   setPosition: (position: number) => void
-  disabled: boolean
   thumbColor: string
   playedColor: string
 }
 
-function formatSeccounds(seccounds: number) {
-  const minutes = parseInt((seccounds / 60).toString())
-    .toString()
-    .padStart(2, '0')
-  const restSeccounds = parseInt((seccounds % 60).toString())
-    .toString()
-    .padStart(2, '0')
-  return `${minutes}:${restSeccounds}`
-}
-
-const DurationBar: React.FC<Props> = ({
+const VolumeBar: React.FC<Props> = ({
   position,
   end,
   setPosition,
-  disabled,
   playedColor,
   thumbColor
 }) => {
@@ -40,23 +29,25 @@ const DurationBar: React.FC<Props> = ({
       <div className="flex justify-between items-center gap-1 w-full h-5 text-sm px-1 mt-1" />
     )
   } else {
+    // col-span-7
     return (
       <div className="flex justify-between items-center gap-1 w-full h-5 text-sm px-1 mt-1">
-        <span>{formatSeccounds(values[0])}</span>
+        <MdVolumeUp size="1.5em" />
         <Range
           values={values}
+          step={0.01}
           onChange={v => {
             setBlock(true)
             setValues(v)
+            setPosition(v[0])
           }}
           onFinalChange={v => {
             setBlock(false)
             setValues(v)
-            setPosition(v[0])
+            // setPosition(v[0])
           }}
           min={0}
           max={end}
-          disabled={disabled}
           renderThumb={({ props }) => (
             <div
               {...props}
@@ -92,10 +83,9 @@ const DurationBar: React.FC<Props> = ({
             </div>
           )}
         />
-        <span>{formatSeccounds(end)}</span>
       </div>
     )
   }
 }
 
-export const DurationBarMemo = React.memo(DurationBar)
+export const VolumeBarMemo = React.memo(VolumeBar)

@@ -1,4 +1,4 @@
-import { DatabaseManager } from '../../database/database'
+import { getDatabase } from '../../database'
 import api from '../api'
 import { Album } from '../apiTypes'
 import {
@@ -10,6 +10,8 @@ import { getNetworkState, NetworkState } from './utils'
 
 export class FetchAlbums extends EventTarget {
   networkState: NetworkState
+  apiResult: Album[] = []
+  dbResult: Album[] = []
   constructor() {
     super()
     this.networkState = getNetworkState()
@@ -21,10 +23,17 @@ export class FetchAlbums extends EventTarget {
     if (networkState === 'api only') this.goToApiOnly()
     else if (networkState === 'db first') this.goToDbFirst()
     else if (networkState === 'db only') this.goToDbOnly()
+    else if (networkState === 'offline') this.networkError()
+  }
+
+  private networkError() {
+    const dataEvent = new CustomEvent<string>('error', { detail: 'Offline' })
+    this.dispatchEvent(dataEvent)
   }
 
   private async goToApiOnly() {
     let page = 0
+    let save = false
     while (true) {
       try {
         const result = await this.fetchFromApi(page)
@@ -32,13 +41,15 @@ export class FetchAlbums extends EventTarget {
           detail: result
         })
         this.dispatchEvent(dataEvent)
-        await this.saveInDb(result)
+        this.apiResult = [...this.apiResult, ...result]
         page++
       } catch (error: any) {
         const code: string =
           error.code || error.response?.data?.code || 'Unknoow Error'
-        if (code === 'NotFoundAlbums' && page > 0) break
-        else if (this.networkState === 'db first' || page > 0) {
+        if (code === 'NotFoundAlbums' && page > 0) {
+          save = true
+          break
+        } else if (this.networkState === 'db first' || page > 0) {
           const dataEvent = new CustomEvent<string>('error', {
             detail: 'NotLoadAllAlbums'
           })
@@ -51,6 +62,7 @@ export class FetchAlbums extends EventTarget {
         }
       }
     }
+    if (save) await this.saveInDb()
   }
 
   private async goToDbFirst() {
@@ -83,18 +95,39 @@ export class FetchAlbums extends EventTarget {
   }
 
   private async fetchFromDb(): Promise<Album[]> {
-    const database = new DatabaseManager()
-    await database.open()
+    const database = await getDatabase()
 
-    const albums: Album[] = await database.getObjects('albums')
+    const albums: Album[] = await database.select({
+      from: 'albums'
+    })
+    this.dbResult = albums
     return albums
   }
 
-  private async saveInDb(albums: Album[]) {
-    const database = new DatabaseManager()
-    await database.open()
+  private async saveInDb() {
+    const deleteValues: string[] = []
+    const updateValues: Album[] = []
 
-    await database.addObjects(albums, 'albums')
+    this.dbResult.forEach(result => {
+      if (this.apiResult.findIndex(test => test.id === result.id) !== -1) {
+        updateValues.push(result)
+      } else deleteValues.push(result.id)
+    })
+
+    const database = await getDatabase()
+
+    await database.insert({
+      into: 'albums',
+      values: updateValues,
+      upsert: true
+    })
+
+    await database.remove({
+      from: 'albums',
+      where: {
+        id: { in: deleteValues }
+      }
+    })
   }
 
   addEventListener(

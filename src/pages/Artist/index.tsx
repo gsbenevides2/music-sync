@@ -3,13 +3,14 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router-dom'
 
 import LaggerList from '../../components/LaggerList'
-import { useMessage } from '../../components/Message/index.'
 import { ScreenContainer } from '../../components/ScreenContainer'
 import { EmptyScreen } from '../../components/ScreenMessager/EmptyScreen'
 import { LoadingScreen } from '../../components/ScreenMessager/LoadingScreen'
 import { NotFoundScreen } from '../../components/ScreenMessager/NotFoundScreen'
 import { OfflineScreen } from '../../components/ScreenMessager/OfflineScreen'
 import { ServerErrorScreen } from '../../components/ScreenMessager/ServerErrorScreen'
+import { useMessage } from '../../contexts/Message/index.'
+import { useModal } from '../../contexts/Modal'
 import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
@@ -30,9 +31,10 @@ type PageState =
 type Params = { id: string }
 
 export const ArtistScreen: React.FC = () => {
-  const [musics, , appendMusics] = useArrayState<MusicWithArtistAndAlbum>({
+  const musicsArray = useArrayState<MusicWithArtistAndAlbum>({
     initialState: [],
-    orderingFunction: array => orderByPropety(array, 'name')
+    orderingFunction: array => orderByPropety(array, 'name'),
+    equalsFunction: (a, b) => a.id === b.id
   })
   const [artistName, setArtistName] = React.useState<string>()
   const [pageState, setPageState] = React.useState<PageState>('Loading')
@@ -40,6 +42,7 @@ export const ArtistScreen: React.FC = () => {
   const musicListContext = React.useContext(MusicListContext)
   const { id } = useParams<Params>()
   const showMessage = useMessage()
+  const modal = useModal()
 
   React.useEffect(() => {
     const abort = new AbortController()
@@ -55,7 +58,7 @@ export const ArtistScreen: React.FC = () => {
         const musicsFetched = event.detail
         setPageState('Loaded')
         setArtistName(musicsFetched[0].artist.name)
-        appendMusics(musicsFetched, (a, b) => a.id === b.id)
+        musicsArray.append(musicsFetched)
       },
       { signal: abort.signal }
     )
@@ -81,17 +84,23 @@ export const ArtistScreen: React.FC = () => {
 
   const musicCallback = React.useCallback(
     (id: string) => {
-      const music = musics.find(music => music.id === id)
+      const music = musicsArray.value.find(music => music.id === id)
       if (!music || !playerContext) return
       playerContext.playMusic(music)
-      musicListContext?.setMusicList(musics)
+      musicListContext?.setMusicList(musicsArray.value)
     },
-    [musics]
+    [musicsArray.value]
   )
   React.useEffect(() => {
     const titlePage = document.getElementById('titlePage')
     if (titlePage) titlePage.innerText = artistName || 'Carregando Artista'
   }, [artistName])
+
+  const onRightClick = React.useCallback((id: string) => {
+    modal.openModal(id, ['AddToPlaylist', 'DeleteMusic'], () => {
+      musicsArray.delete({ id } as MusicWithArtistAndAlbum)
+    })
+  }, [])
 
   let Content
   if (pageState === 'Loading') Content = <LoadingScreen />
@@ -104,7 +113,7 @@ export const ArtistScreen: React.FC = () => {
   else if (pageState === 'Loaded') {
     Content = (
       <LaggerList
-        listOfItems={musics.map(music => {
+        listOfItems={musicsArray.value.map(music => {
           return {
             id: music.id,
             title: music.name,
@@ -113,6 +122,7 @@ export const ArtistScreen: React.FC = () => {
           }
         })}
         onClick={musicCallback}
+        onRightClick={onRightClick}
         minimal
         lowerMargin
       />

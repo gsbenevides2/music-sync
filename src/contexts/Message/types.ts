@@ -20,7 +20,7 @@ export const messages = {
       window.location.href = window.location.origin
     }
   },
- 
+
   MusicAlreadyExists: {
     type: 'warn',
     text: 'A música já existe!'
@@ -41,21 +41,29 @@ export const messages = {
     type: 'error',
     text: 'Não foi possivel carregar todas os artistas!'
   },
-  SpotifyOK:{
-    type:'success',
-    text:'Autenticação com Spotify realizada com sucesso!'
+  SpotifyOK: {
+    type: 'success',
+    text: 'Autenticação com Spotify realizada com sucesso!'
   },
-  YoutubeOK:{
-    type:'success',
-    text:'Autenticação com Youtube realizada com sucesso!'
+  YoutubeOK: {
+    type: 'success',
+    text: 'Autenticação com Youtube realizada com sucesso!'
   },
-  PlaylistCreated:{
-    type:'success',
-    text:'Playlist criada com sucesso!'
+  PlaylistCreated: {
+    type: 'success',
+    text: 'Playlist criada com sucesso!'
   },
-  UnknowError:{
-    type:'error',
-    text:'Ocorreu um erro desconhecido. Tente novamente mais tarde.'
+  UnknowError: {
+    type: 'error',
+    text: 'Ocorreu um erro desconhecido. Tente novamente mais tarde.'
+  },
+  MusicAddedToPlaylist: {
+    type: 'success',
+    text: 'Música adicionada a playlist!'
+  },
+  MusicDeleted : {
+    type:'success',
+    text:'Música deletada com sucesso!'
   }
 }
 

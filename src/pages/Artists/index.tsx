@@ -3,12 +3,12 @@ import { Helmet } from 'react-helmet'
 import { useHistory } from 'react-router-dom'
 
 import LaggerList from '../../components/LaggerList'
-import { useMessage } from '../../components/Message/index.'
 import { ScreenContainer } from '../../components/ScreenContainer'
 import { EmptyScreen } from '../../components/ScreenMessager/EmptyScreen'
 import { LoadingScreen } from '../../components/ScreenMessager/LoadingScreen'
 import { OfflineScreen } from '../../components/ScreenMessager/OfflineScreen'
 import { ServerErrorScreen } from '../../components/ScreenMessager/ServerErrorScreen'
+import { useMessage } from '../../contexts/Message/index.'
 import { Artist } from '../../services/api/apiTypes'
 import { FetchArtists } from '../../services/api/fetchs/artists'
 import { orderByPropety } from '../../utils/orderByProperty'
@@ -19,9 +19,10 @@ import { useArrayState } from '../../utils/useArrayState'
 type PageState = 'Loading' | 'Empty' | 'Error' | 'Loaded' | 'Offline'
 
 const ArtistsScreen: React.FC = () => {
-  const [artists, , appendArtists] = useArrayState<Artist>({
+  const artistsArray = useArrayState<Artist>({
     initialState: [],
-    orderingFunction: array => orderByPropety(array, 'name')
+    orderingFunction: array => orderByPropety(array, 'name'),
+    equalsFunction: (a, b) => a.id === b.id
   })
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const history = useHistory()
@@ -37,7 +38,7 @@ const ArtistsScreen: React.FC = () => {
       event => {
         const artistsFetched = event.detail
         setPageState('Loaded')
-        appendArtists(artistsFetched, (a, b) => a.id === b.id)
+        artistsArray.append(artistsFetched)
       },
       { signal: abort.signal }
     )
@@ -71,7 +72,7 @@ const ArtistsScreen: React.FC = () => {
   else if (pageState === 'Loaded') {
     Content = (
       <LaggerList
-        listOfItems={artists.map(album => {
+        listOfItems={artistsArray.value.map(album => {
           return {
             id: album.id,
             title: album.name,

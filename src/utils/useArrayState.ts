@@ -3,38 +3,52 @@ import React from 'react'
 interface Options<T> {
   initialState: T[]
   orderingFunction?: (array: T[]) => T[]
+  equalsFunction?: (a: T, b: T) => boolean
 }
 
-type Returned<T> = [
-  T[],
-  React.Dispatch<React.SetStateAction<T[]>>,
-  (appendArray: T[], equalsFunction: (a: T, b: T) => boolean) => void
-]
+interface Returned<T> {
+  value: T[]
+  setValue: React.Dispatch<React.SetStateAction<T[]>>
+  append: (appendArray: T[]) => void
+  delete: (value: T) => void
+}
 
 export function useArrayState<T>(options: Options<T>): Returned<T> {
-  const [array, setArray] = React.useState<T[]>(options.initialState)
+  const [value, setValue] = React.useState<T[]>(options.initialState)
 
-  const appendToArray = React.useCallback(
-    (appendArray: T[], equalsFunction: (a: T, b: T) => boolean) => {
-      setArray(array => {
-        const newArray = [...array]
+  const append = React.useCallback((appendArray: T[]) => {
+    setValue(value => {
+      let newArray = [...value]
+
+      if (options.equalsFunction !== undefined) {
         for (const appendValue of appendArray) {
           const indexTest = newArray.findIndex(value =>
-            equalsFunction(value, appendValue)
+            options.equalsFunction?.(value, appendValue)
           )
-          if (indexTest === -1) {
-            newArray.push(appendValue)
-          } else {
-            newArray[indexTest] = appendValue
-          }
+          if (indexTest === -1) newArray.push(appendValue)
+          else newArray[indexTest] = appendValue
         }
-        if (options.orderingFunction) {
-          return options.orderingFunction(newArray)
-        } else return newArray
-      })
-    },
-    []
-  )
+      } else {
+        newArray = [...newArray, ...appendArray]
+      }
 
-  return [array, setArray, appendToArray]
+      if (options.orderingFunction) {
+        return options.orderingFunction(newArray)
+      } else return newArray
+    })
+  }, [])
+
+  const deleteValue = React.useCallback((value: T) => {
+    setValue(array => {
+      return array.filter(test => {
+        if (options.equalsFunction) {
+          if (options.equalsFunction(value, test) === false) {
+            return test
+          } else return null
+        } else return test
+      })
+    })
+  }, [])
+
+  return { value, setValue, append, delete: deleteValue }
 }

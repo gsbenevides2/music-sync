@@ -15,28 +15,27 @@ import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
 import { FetchMusics } from '../../services/api/fetchs/musics'
-import { orderByPropety } from '../../utils/orderByProperty'
+import { FetchPlaylist } from '../../services/api/fetchs/playlists'
 import { useArrayState } from '../../utils/useArrayState'
 
 // import { MusicsResponse } from '../../services/api.types'
 
 type PageState =
   | 'Loading'
-  | 'EmptyAlbum'
+  | 'EmptyPlaylist'
   | 'Error'
   | 'Loaded'
   | 'Offline'
-  | 'AlbumNotFound'
+  | 'PlaylistNotFound'
 
 type Params = { id: string }
 
-export const AlbumScreen: React.FC = () => {
+export const PlaylistScreen: React.FC = () => {
   const musicsArray = useArrayState<MusicWithArtistAndAlbum>({
     initialState: [],
-    orderingFunction: array => orderByPropety(array, 'name'),
     equalsFunction: (a, b) => a.id === b.id
   })
-  const [albumName, setAlbumName] = React.useState<string>()
+  const [playlistName, setPlaylistName] = React.useState<string>()
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const playerContext = React.useContext(PlayerContext)
   const musicListContext = React.useContext(MusicListContext)
@@ -49,7 +48,7 @@ export const AlbumScreen: React.FC = () => {
     const fetcher = new FetchMusics<MusicWithArtistAndAlbum>({
       withAlbum: true,
       withArtist: true,
-      findByAlbumId: id
+      findByPlaylistId: id
     })
 
     fetcher.addEventListener(
@@ -57,7 +56,7 @@ export const AlbumScreen: React.FC = () => {
       event => {
         const musicsFetched = event.detail
         setPageState('Loaded')
-        setAlbumName(musicsFetched[0].album.name)
+        // setPlaylist(musicsFetched[0].album.name)
         musicsArray.append(musicsFetched)
       },
       { signal: abort.signal }
@@ -69,17 +68,33 @@ export const AlbumScreen: React.FC = () => {
         if (code === 'Offline') setPageState('Offline')
         else if (code === 'SessionNotFound' || code === 'TokenInvalid')
           showMessage(code)
-        else if (code === 'NotFoundMusics') setPageState('EmptyAlbum')
+        else if (code === 'NotFoundMusics') setPageState('EmptyPlaylist')
         else if (code === 'NotLoadAllMusics') setPageState('Loaded')
-        else if (code === 'AlbumNotExists') {
-          setAlbumName('Album não existe')
-          setPageState('AlbumNotFound')
+        else if (code === 'PlaylistNotExists') {
+          setPlaylistName('Playlist não existe')
+          setPageState('PlaylistNotFound')
         } else setPageState('Error')
       },
       { signal: abort.signal }
     )
 
     fetcher.start()
+  }, [id])
+
+  React.useEffect(() => {
+    const abort = new AbortController()
+    const fetcher = new FetchPlaylist(id)
+    fetcher.addEventListener(
+      'data',
+      event => {
+        setPlaylistName(event.detail.name)
+      },
+      { signal: abort.signal }
+    )
+    fetcher.start()
+    return () => {
+      abort.abort()
+    }
   }, [id])
 
   const musicCallback = React.useCallback(
@@ -94,8 +109,8 @@ export const AlbumScreen: React.FC = () => {
 
   React.useEffect(() => {
     const titlePage = document.getElementById('titlePage')
-    if (titlePage) titlePage.innerText = albumName || 'Carregando Album'
-  }, [albumName])
+    if (titlePage) titlePage.innerText = playlistName || 'Carregando Playlist'
+  }, [playlistName])
 
   const onRightClick = React.useCallback((id: string) => {
     modal.openModal(id, ['AddToPlaylist', 'DeleteMusic'], () => {
@@ -106,11 +121,11 @@ export const AlbumScreen: React.FC = () => {
   let Content
   if (pageState === 'Loading') Content = <LoadingScreen />
   else if (pageState === 'Offline') Content = <OfflineScreen />
-  else if (pageState === 'EmptyAlbum')
-    Content = <EmptyScreen text="Este album não tem músicas." />
+  else if (pageState === 'EmptyPlaylist')
+    Content = <EmptyScreen text="Esta playlist não tem músicas." />
   else if (pageState === 'Error') Content = <ServerErrorScreen />
-  else if (pageState === 'AlbumNotFound')
-    Content = <NotFoundScreen text="Esse album não existe!" />
+  else if (pageState === 'PlaylistNotFound')
+    Content = <NotFoundScreen text="Essa playlist não existe!" />
   else if (pageState === 'Loaded') {
     Content = (
       <LaggerList
@@ -133,7 +148,7 @@ export const AlbumScreen: React.FC = () => {
   return (
     <ScreenContainer minimal>
       <Helmet>
-        <title>{albumName || 'Carregando Album'}</title>
+        <title>{playlistName || 'Carregando Playlist'}</title>
       </Helmet>
 
       <br />

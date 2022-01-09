@@ -1,4 +1,4 @@
-import { DatabaseManager } from '../../database/database'
+import { getDatabase } from '../../database'
 import api from '../api'
 import {
   Music,
@@ -6,7 +6,8 @@ import {
   MusicWithArtistAndAlbum,
   MusicWithArtist,
   Artist,
-  Album
+  Album,
+  PlaylistItem
 } from '../apiTypes'
 import {
   EventListenerOrEventListenerObject,
@@ -23,6 +24,7 @@ interface OptionsMusic {
 interface OptionsMusics extends OptionsMusic {
   findByAlbumId?: string
   findByArtistId?: string
+  findByPlaylistId?: string
 }
 
 type ResultNotArray =
@@ -34,6 +36,8 @@ type ResultNotArray =
 export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
   options: OptionsMusics
   networkState: NetworkState
+  dbResult: Type[] = []
+  apiResult: Type[] = []
   constructor(options: OptionsMusics) {
     super()
     this.networkState = getNetworkState()
@@ -46,10 +50,17 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
     if (networkState === 'api only') this.goToApiOnly()
     else if (networkState === 'db first') this.goToDbFirst()
     else if (networkState === 'db only') this.goToDbOnly()
+    else if (networkState === 'offline') this.networkError()
+  }
+
+  private networkError() {
+    const dataEvent = new CustomEvent<string>('error', { detail: 'Offline' })
+    this.dispatchEvent(dataEvent)
   }
 
   private async goToApiOnly() {
     let page = 0
+    let save = false
     while (true) {
       try {
         const result = await this.fetchFromApi(page)
@@ -57,13 +68,15 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
           detail: result
         })
         this.dispatchEvent(dataEvent)
-        await this.saveInDb(result)
+        this.apiResult = [...this.apiResult, ...result]
         page++
       } catch (error: any) {
         const code: string =
           error.code || error.response?.data?.code || 'Unknoow Error'
-        if (code === 'NotFoundMusics' && page > 0) break
-        else if (this.networkState === 'db first' || page > 0) {
+        if (code === 'NotFoundMusics' && page > 0) {
+          save = true
+          break
+        } else if (this.networkState === 'db first' || page > 0) {
           const dataEvent = new CustomEvent<string>('error', {
             detail: 'NotLoadAllMusics'
           })
@@ -76,6 +89,8 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
         }
       }
     }
+
+    if (save) await this.saveInDb()
   }
 
   private async goToDbFirst() {
@@ -93,12 +108,18 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
 
   private fetchFromApi(page: number) {
     return new Promise<Type[]>((resolve, reject) => {
-      const { withAlbum, withArtist, findByAlbumId, findByArtistId } =
-        this.options
+      const {
+        withAlbum,
+        withArtist,
+        findByAlbumId,
+        findByArtistId,
+        findByPlaylistId
+      } = this.options
 
       let url
       if (findByAlbumId) url = `/album/${findByAlbumId}/musics`
       else if (findByArtistId) url = `/artist/${findByArtistId}/musics`
+      else if (findByPlaylistId) url = `/playlist/${findByPlaylistId}/musics`
       else url = `/musics`
 
       api
@@ -118,34 +139,60 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
   }
 
   private async fetchFromDb(): Promise<Type[]> {
-    const { withAlbum, withArtist, findByArtistId, findByAlbumId } =
-      this.options
+    const {
+      withAlbum,
+      withArtist,
+      findByArtistId,
+      findByAlbumId,
+      findByPlaylistId
+    } = this.options
 
-    const database = new DatabaseManager()
-    await database.open()
+    const database = await getDatabase()
 
     let musics: Music[]
     if (findByArtistId) {
-      musics = await database.getObjectsUsingFilter(
-        'musics',
-        'artistId',
-        findByArtistId
-      )
+      musics = await database.select<Music>({
+        from: 'musics',
+        where: {
+          artistId: findByPlaylistId as string
+        }
+      })
     } else if (findByAlbumId) {
-      musics = await database.getObjectsUsingFilter(
-        'musics',
-        'albumId',
-        findByAlbumId
-      )
+      musics = await database.select<Music>({
+        from: 'musics',
+        where: {
+          albumId: findByAlbumId as string
+        }
+      })
+    } else if (findByPlaylistId) {
+      const musicsOnPlaylist = await database.select<PlaylistItem>({
+        from: 'musics_playlists',
+        where: { playlistId: findByPlaylistId as string }
+      })
+      const musicsIds = musicsOnPlaylist[0].musics
+      musics = await database.select<Music>({
+        from: 'musics',
+        where: {
+          id: {
+            in: musicsIds
+          }
+        }
+      })
     } else {
-      musics = await database.getObjects('musics')
+      musics = await database.select<Music>({
+        from: 'musics'
+      })
     }
 
-    const artists: Artist[] = withArtist
-      ? await database.getObjects('artists')
+    const artists = withArtist
+      ? await database.select<Artist>({ from: 'artists' })
       : []
-    const albums: Album[] = withAlbum ? await database.getObjects('albums') : []
-    return musics.map(music => {
+
+    const albums = withAlbum
+      ? await database.select<Album>({ from: 'albums' })
+      : []
+
+    const result = musics.map(music => {
       const retuned: any = {
         id: music.id,
         name: music.name,
@@ -165,16 +212,26 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
 
       return retuned as Type
     })
+    this.dbResult = result
+    return result
   }
 
-  private async saveInDb(result: Type[]) {
-    const database = new DatabaseManager()
-    await database.open()
+  private async saveInDb() {
+    const deleteValues: Type[] = []
+    const updateValues: Type[] = []
+
+    this.dbResult.forEach(result => {
+      if (this.apiResult.findIndex(test => test.id === result.id) !== -1) {
+        updateValues.push(result)
+      } else deleteValues.push(result)
+    })
+
+    const database = await getDatabase()
 
     const artists: Artist[] = []
     const albums: Album[] = []
 
-    const musicsF: Music[] = result.map(m => {
+    const musicsUpdate: Music[] = updateValues.map(m => {
       let albumId: string
       let artistId: string
 
@@ -208,11 +265,65 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
       }
     })
 
+    const musicsDelete: string[] = deleteValues.map(m => {
+      let albumId: string
+      let artistId: string
+
+      if ('album' in m) {
+        albumId = m.album.id
+        const findedAlbum = albums.findIndex(album => album.id === albumId)
+        if (findedAlbum === -1) albums.push(m.album)
+      } else {
+        albumId = m.albumId
+      }
+
+      if ('artist' in m) {
+        artistId = m.artist.id
+        const findedArtist = artists.findIndex(artist => artist.id === artistId)
+        if (findedArtist === -1) artists.push(m.artist)
+      } else {
+        artistId = m.artistId
+      }
+
+      return m.id
+    })
+
     await Promise.all([
-      database.addObjects(artists, 'artists'),
-      database.addObjects(albums, 'albums'),
-      database.addObjects(musicsF, 'musics')
+      database.insert({
+        into: 'artists',
+        values: artists,
+        upsert: true
+      }),
+      database.insert({
+        into: 'albums',
+        values: albums,
+        upsert: true
+      }),
+      database.insert({
+        into: 'musics',
+        values: musicsUpdate,
+        upsert: true
+      }),
+      database.remove({
+        from: 'musics',
+        where: {
+          id: { in: musicsDelete }
+        }
+      })
     ])
+
+    if (this.options.findByPlaylistId) {
+      const playlistMusicsUpdates: PlaylistItem = {
+        playlistId: this.options.findByPlaylistId,
+        musics: this.apiResult.map(value => value.id)
+      }
+
+      await database.insert({
+        into: 'musics_playlists',
+        values: [playlistMusicsUpdates],
+        upsert: true
+      })
+    }
   }
 
   addEventListener(
@@ -255,35 +366,28 @@ export class FetchMusic<Type extends ResultNotArray> extends EventTarget {
     if (networkState === 'api only') this.goToApiOnly()
     else if (networkState === 'db first') this.goToDbFirst()
     else if (networkState === 'db only') this.goToDbOnly()
+    else if (networkState === 'offline') this.networkError()
+  }
+
+  private networkError() {
+    const dataEvent = new CustomEvent<string>('error', { detail: 'Offline' })
+    this.dispatchEvent(dataEvent)
   }
 
   private async goToApiOnly() {
-    let page = 0
-    while (true) {
-      try {
-        const result = await this.fetchFromApi(page)
-        const dataEvent = new CustomEvent<Type>('data', {
-          detail: result
-        })
-        this.dispatchEvent(dataEvent)
-        await this.saveInDb(result)
-        page++
-      } catch (error: any) {
-        const code: string =
-          error.code || error.response?.data?.code || 'Unknoow Error'
-        if (code === 'NotFoundMusics' && page > 0) break
-        else if (this.networkState === 'db first' || page > 0) {
-          const dataEvent = new CustomEvent<string>('error', {
-            detail: 'NotLoadAllMusics'
-          })
-          this.dispatchEvent(dataEvent)
-          break
-        } else {
-          const dataEvent = new CustomEvent<string>('error', { detail: code })
-          this.dispatchEvent(dataEvent)
-          break
-        }
-      }
+    try {
+      const result = await this.fetchFromApi()
+      const dataEvent = new CustomEvent<Type>('data', {
+        detail: result
+      })
+      this.dispatchEvent(dataEvent)
+      await this.saveInDb(result)
+    } catch (error: any) {
+      const code: string =
+        error.code || error.response?.data?.code || 'Unknoow Error'
+
+      const dataEvent = new CustomEvent<string>('error', { detail: code })
+      this.dispatchEvent(dataEvent)
     }
   }
 
@@ -300,7 +404,7 @@ export class FetchMusic<Type extends ResultNotArray> extends EventTarget {
     this.dispatchEvent(dataEvent)
   }
 
-  private fetchFromApi(page: number) {
+  private fetchFromApi() {
     return new Promise<Type>((resolve, reject) => {
       const { withAlbum, withArtist } = this.options
       const musicId = this.musicId
@@ -310,8 +414,7 @@ export class FetchMusic<Type extends ResultNotArray> extends EventTarget {
           method: 'get',
           params: {
             withAlbum,
-            withArtist,
-            pag: page
+            withArtist
           }
         })
         .then(response => {
@@ -324,24 +427,31 @@ export class FetchMusic<Type extends ResultNotArray> extends EventTarget {
   private async fetchFromDb(): Promise<Type> {
     const { withAlbum, withArtist } = this.options
     const id = this.musicId
-    const database = new DatabaseManager()
-    await database.open()
-    const { albumId, artistId, ...rest } = (await database.getObject(
-      'musics',
-      id
-    )) as Music
+    const database = await getDatabase()
+
+    const musics = await database.select<Music>({
+      from: 'musics',
+      where: { id }
+    })
+    const { albumId, artistId, ...rest } = musics[0]
     const result: any = rest
 
     if (withArtist) {
-      const artist = await database.getObject('artists', artistId)
-      result.artist = artist
+      const artists = await database.select<Artist>({
+        from: 'artists',
+        where: { id: artistId }
+      })
+      result.artist = artists[0]
     } else {
       result.artistId = artistId
     }
 
     if (withAlbum) {
-      const album = await database.getObject('albums', albumId)
-      result.album = album
+      const albums = await database.select<Album>({
+        from: 'albums',
+        where: { id: albumId }
+      })
+      result.album = albums[0]
     } else {
       result.albumId = albumId
     }
@@ -371,23 +481,34 @@ export class FetchMusic<Type extends ResultNotArray> extends EventTarget {
       youtubeId,
       lyrics
     }
-    const database = new DatabaseManager()
-    await database.open()
+    const database = await getDatabase()
 
     if ('album' in result) {
-      await database.addObject(result.album, 'albums')
+      await database.insert({
+        into: 'albums',
+        values: [result.album],
+        upsert: true
+      })
       music.albumId = result.album.id
     } else {
       music.albumId = result.albumId
     }
 
     if ('artist' in result) {
-      await database.addObject(result.artist, 'artists')
+      await database.insert({
+        into: 'artists',
+        values: [result.artist],
+        upsert: true
+      })
       music.artistId = result.artist.id
     } else {
       music.artistId = result.artistId
     }
-    await database.addObject(music, 'musics')
+    await database.insert({
+      into: 'musics',
+      values: [music],
+      upsert: true
+    })
   }
 
   addEventListener(

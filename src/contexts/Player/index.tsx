@@ -11,6 +11,7 @@ import { usePlayMusic } from './hooks/usePlayMusic'
 import { usePlayOrPause } from './hooks/usePlayOrPause'
 import { usePreviousMusic } from './hooks/usePreviousMusic'
 import { useSetAudioPosition } from './hooks/useSetAudioPosition'
+import { useVoulume } from './hooks/useVolume'
 
 interface Context {
   playMusic: (music: MusicWithArtistAndAlbum) => void
@@ -23,6 +24,10 @@ interface Context {
   waiting: boolean
   duration: number
   currentTime: number
+  volume: number
+  volumeChange: (newVolume: number) => void
+  volumeUp: () => void
+  volumeDown: () => void
 }
 
 export const PlayerContext = React.createContext<Context | null>(null)
@@ -60,8 +65,16 @@ export const PlayerContextProvider: React.FC = ({ children }) => {
     nextMusic,
     setWaiting
   )
+  const volumeState = useVoulume(audio)
   useMediaSessionHandlers(audio, nextMusic, previousMusic, setPosition)
-  useKeyboardToHandleEvents(audio, actualMusic, previousMusic, nextMusic)
+  useKeyboardToHandleEvents(
+    audio,
+    actualMusic,
+    previousMusic,
+    nextMusic,
+    volumeState.volumeUp,
+    volumeState.volumeDown
+  )
   useMediaSessionMetadata(actualMusic)
 
   return (
@@ -76,7 +89,8 @@ export const PlayerContextProvider: React.FC = ({ children }) => {
         actualMusic,
         playing,
         duration,
-        currentTime
+        currentTime,
+        ...volumeState
       }}
     >
       {children}

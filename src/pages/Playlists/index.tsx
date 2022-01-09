@@ -1,45 +1,50 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
-import { useHistory } from 'react-router-dom'
+import { MdPlaylistAddCheck } from 'react-icons/md'
+import { useHistory } from 'react-router'
 
-import LaggerList from '../../components/LaggerList'
+import { OptionsItem, OptionsList } from '../../components/OptionsList'
 import { ScreenContainer } from '../../components/ScreenContainer'
 import { EmptyScreen } from '../../components/ScreenMessager/EmptyScreen'
 import { LoadingScreen } from '../../components/ScreenMessager/LoadingScreen'
 import { OfflineScreen } from '../../components/ScreenMessager/OfflineScreen'
 import { ServerErrorScreen } from '../../components/ScreenMessager/ServerErrorScreen'
 import { useMessage } from '../../contexts/Message/index.'
-import { Album } from '../../services/api/apiTypes'
-import { FetchAlbums } from '../../services/api/fetchs/albums'
+import { Playlist } from '../../services/api/apiTypes'
+import { FetchPlaylists } from '../../services/api/fetchs/playlists'
 import { orderByPropety } from '../../utils/orderByProperty'
 import { useArrayState } from '../../utils/useArrayState'
 
-// import { MusicsResponse } from '../../services/api.types'
-
 type PageState = 'Loading' | 'Empty' | 'Error' | 'Loaded' | 'Offline'
 
-const AlbumsScreen: React.FC = () => {
-  const albumsArray = useArrayState<Album>({
+function PlaylistsScreen() {
+  const playlistsArray = useArrayState<Playlist>({
     initialState: [],
     orderingFunction: array => orderByPropety(array, 'name'),
     equalsFunction: (a, b) => a.id === b.id
   })
   const [pageState, setPageState] = React.useState<PageState>('Loading')
-  const history = useHistory()
   const showMessage = useMessage()
+  const history = useHistory()
 
+  const items: OptionsItem[] = playlistsArray.value.map(playlist => {
+    return {
+      icon: MdPlaylistAddCheck,
+      title: playlist.name,
+      onClick: () => history.push(`/dashboard/playlist/${playlist.id}`)
+    }
+  })
   React.useEffect(() => {
-    const abort = new AbortController()
-    const fetcher = new FetchAlbums()
+    const abortController = new AbortController()
 
+    const fetcher = new FetchPlaylists()
     fetcher.addEventListener(
       'data',
       event => {
-        const albumsFetched = event.detail
         setPageState('Loaded')
-        albumsArray.append(albumsFetched)
+        playlistsArray.append(event.detail)
       },
-      { signal: abort.signal }
+      { signal: abortController.signal }
     )
     fetcher.addEventListener(
       'error',
@@ -48,51 +53,39 @@ const AlbumsScreen: React.FC = () => {
         if (code === 'Offline') setPageState('Offline')
         else if (code === 'SessionNotFound' || code === 'TokenInvalid')
           showMessage(code)
-        else if (code === 'NotFoundAlbums') setPageState('Empty')
-        else if (code === 'NotLoadAllAlbums') setPageState('Loaded')
+        else if (code === 'NotFoundPlaylists') setPageState('Empty')
         else setPageState('Error')
       },
-      { signal: abort.signal }
+      { signal: abortController.signal }
     )
-
     fetcher.start()
   }, [])
 
-  const albumCallback = React.useCallback((id: string) => {
-    history.push(`/dashboard/album/${id}`)
-  }, [])
-
   let Content
-  if (pageState === 'Loading') Content = <LoadingScreen />
-  else if (pageState === 'Offline') Content = <OfflineScreen />
+  if (pageState === 'Offline') Content = <OfflineScreen />
   else if (pageState === 'Empty')
-    Content = <EmptyScreen text="Você ainda não possui albums." />
-  else if (pageState === 'Error') Content = <ServerErrorScreen />
-  else if (pageState === 'Loaded') {
     Content = (
-      <LaggerList
-        listOfItems={albumsArray.value.map(album => {
-          return {
-            id: album.id,
-            title: album.name,
-            imageSrc: album.spotifyCoverUrl
-          }
-        })}
-        onClick={albumCallback}
+      <EmptyScreen text="Você não tem playlists. Tente ir nas configurações." />
+    )
+  else if (pageState === 'Loaded')
+    Content = (
+      <OptionsList
+        ulClassName="relative transform pt-1.5 w-screen"
+        items={items}
       />
     )
-  }
+  else if (pageState === 'Loading') Content = <LoadingScreen />
+  else Content = <ServerErrorScreen />
 
   return (
-    <ScreenContainer>
+    <ScreenContainer lowerMargin>
       <Helmet>
-        <title>Music Sync - Todos os Albums</title>
+        <title>Music Sync - Todas as Playlists</title>
       </Helmet>
 
-      <br />
       {Content}
     </ScreenContainer>
   )
 }
 
-export default AlbumsScreen
+export default PlaylistsScreen

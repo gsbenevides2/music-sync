@@ -28,6 +28,19 @@ export interface Music {
   artistId: string
 }
 
+export interface Playlist {
+  id: string
+  name: string
+  youtubeId: string
+  spotifyId: string
+  createdAt: Date
+}
+
+export interface PlaylistItem {
+  playlistId: string
+  musics: string[]
+}
+
 export interface MusicWithArtist extends Omit<Music, 'artistId'> {
   artist: Artist
 }
@@ -41,8 +54,8 @@ export interface MusicWithArtistAndAlbum
   album: Album
 }
 
-export interface MusicCreated{
-  code:'MusicCreated',
-  id:string
-  message:'Music created.'
+export interface MusicCreated {
+  code: 'MusicCreated'
+  id: string
+  message: 'Music created.'
 }
