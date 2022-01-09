@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
 
 import { YoutubeService } from '../services/youtube'
-import { AppError, UnknownError } from '../utils/error'
+import { AppError } from '../utils/errors/AppError'
+import { UnknownError } from '../utils/errors/UnknownError'
 
 const youtubeService = new YoutubeService()
 

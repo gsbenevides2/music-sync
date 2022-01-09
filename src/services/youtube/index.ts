@@ -6,12 +6,10 @@ import { v4 as uuid } from 'uuid'
 
 import { db } from '../../database/db'
 import { decrypt, encrypt } from '../../utils/cripto'
+import { YoutubeLoginInvalid } from '../../utils/errors/YoutubeLoginInvalid'
+import { YoutubeNotLinked } from '../../utils/errors/YoutubeNotLinked'
+import { YoutubeSecureIdInvalid } from '../../utils/errors/YoutubeSecureIdInvalid'
 import { removeSpecialCaractersAndSpaces } from '../../utils/removeSpecialCaractersAndSpaces'
-import {
-  YoutubeLoginInvalid,
-  YoutubeNotLinked,
-  YoutubeSecureIdInvalid
-} from './errors'
 
 interface Config {
   name: string

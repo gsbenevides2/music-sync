@@ -7,8 +7,8 @@ import path from 'path'
 import ytdl from 'ytdl-core'
 
 import { MusicsModel } from '../models/musics'
-import { NotFoundMusic } from '../models/musics/errors'
-import { AppError } from './error'
+import { AppError } from './errors/AppError'
+import { NotFoundMusic } from './errors/NotFoundMusic'
 
 interface MusicData {
   name: string

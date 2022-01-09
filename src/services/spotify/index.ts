@@ -5,11 +5,9 @@ import { v4 as uuid } from 'uuid'
 
 import { db } from '../../database/db'
 import { decrypt, encrypt } from '../../utils/cripto'
-import {
-  SpotifyNotLinked,
-  SpotifySecureIdInvalid,
-  SpotifyUnknownError
-} from './errors'
+import { SpotifyNotLinked } from '../../utils/errors/SpotifyNotLinked'
+import { SpotifySecureIdInvalid } from '../../utils/errors/SpotifySecureIdInvalid'
+import { SpotifyUnknownError } from '../../utils/errors/SpotifyUnknownError'
 
 interface AuthorizationCodeGrantResponse {
   access_token: string

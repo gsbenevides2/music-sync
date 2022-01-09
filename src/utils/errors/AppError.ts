@@ -16,9 +16,3 @@ export class AppError extends Error {
     }
   }
 }
-
-export class UnknownError extends AppError {
-  constructor() {
-    super('UnknownError', 'An unexpected system error has occurred!', 500)
-  }
-}

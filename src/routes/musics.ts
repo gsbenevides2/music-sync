@@ -78,4 +78,12 @@ musicsRoutes.get(
   musicsController.artist
 )
 
+musicsRoutes.get(
+  '/playlist/:id/musics',
+  authValidantion.authenticate,
+  authController.authenticate,
+  musicsValidation.playlist,
+  musicsController.playlist
+)
+
 export { musicsRoutes }

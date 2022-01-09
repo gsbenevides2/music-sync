@@ -3,16 +3,13 @@ import { v4 as uuid } from 'uuid'
 import { db } from '../../database/db'
 import { SpotifyService } from '../../services/spotify'
 import { YoutubeService } from '../../services/youtube'
-import { UnknownError } from '../../utils/error'
+import { NotFoundMusic } from '../../utils/errors/NotFoundMusic'
+import { NotFoundPlaylist } from '../../utils/errors/NotFoundPlaylist'
+import { NotFoundPlaylistItem } from '../../utils/errors/NotFoundPlaylistItem'
+import { SongAlreadyPlaylist } from '../../utils/errors/SongAlreadyPlaylist'
+import { UnknownError } from '../../utils/errors/UnknownError'
 import { MusicsModel } from '../musics'
-import { NotFoundMusic } from '../musics/errors'
 import { Music } from '../musics/types'
-import { useOptionalData } from '../musics/utils'
-import {
-  PlaylistItemNotFound,
-  PlaylistNotFound,
-  SongAlreadyPlaylist
-} from './errors'
 import { Playlist, PlaylistItem } from './types'
 
 const youtubeService = new YoutubeService()
@@ -74,25 +71,6 @@ export class PlaylistsModel {
     return playlists
   }
 
-  async getMusics(
-    playlistId: string,
-    withAlbum: boolean,
-    withArtist: boolean,
-    pag: number
-  ) {
-    const q1 = db('musics_playlists')
-    q1.leftJoin('musics', 'musics_playlists.musicId', '=', 'musics.id')
-    q1.where('musics_playlists.playlistId', '=', playlistId)
-    q1.offset(pag * 10)
-    q1.orderBy('musics_playlists.position', 'asc')
-    q1.limit(10)
-    const { query, rowManager } = useOptionalData(withAlbum, withArtist, q1)
-
-    const result = await query
-
-    return result.map(rowManager)
-  }
-
   async addMusic(playlistId: string, musicId: string) {
     if (!this.musicsModel) throw new UnknownError()
     const music = await this.musicsModel.getOnlyColumns(musicId, [
@@ -105,7 +83,7 @@ export class PlaylistsModel {
       .select('*')
       .where('id', playlistId)
       .first()
-    if (!playlist) throw new PlaylistNotFound()
+    if (!playlist) throw new NotFoundPlaylist()
 
     const playlistsItemsRows = await db<PlaylistItem>('musics_playlists')
       .select('*')
@@ -159,7 +137,7 @@ export class PlaylistsModel {
     const actualPlaylistItem = playlistMusicList.find(
       music => music.musicId === musicId
     )
-    if (!actualPlaylistItem) throw new PlaylistItemNotFound()
+    if (!actualPlaylistItem) throw new NotFoundPlaylistItem()
 
     const playlist = await db<Pick<Playlist, 'spotifyId' | 'youtubeId'>>(
       'playlists'
@@ -167,7 +145,7 @@ export class PlaylistsModel {
       .select(['spotifyId', 'youtubeId'])
       .where('id', playlistId)
       .first()
-    if (!playlist) throw new PlaylistNotFound()
+    if (!playlist) throw new NotFoundPlaylist()
 
     const music = await this.musicsModel.getOnlyColumns(musicId, ['youtubeId'])
     if (!music) throw new NotFoundMusic()
@@ -230,7 +208,7 @@ export class PlaylistsModel {
       .where('playlistId', playlistId)
       .orderBy('position', 'asc')
     const musicInPlaylist = listOfMusics.find(item => item.musicId === musicId)
-    if (!musicInPlaylist) throw new PlaylistItemNotFound()
+    if (!musicInPlaylist) throw new NotFoundPlaylistItem()
 
     const music = await db<Pick<Music, 'youtubeId' | 'spotifyId'>>('musics')
       .select(['youtubeId', 'spotifyId'])
@@ -242,7 +220,7 @@ export class PlaylistsModel {
       .select('spotifyId')
       .where('id', playlistId)
       .first()
-    if (!playlist) throw new PlaylistNotFound()
+    if (!playlist) throw new NotFoundPlaylist()
 
     const trx = await db.transaction()
     await trx('musics_playlists')
@@ -273,7 +251,7 @@ export class PlaylistsModel {
       .select()
       .where('id', playlistId)
       .first()
-    if (!playlist) throw new PlaylistNotFound()
+    if (!playlist) throw new NotFoundPlaylist()
 
     await db('playlists').delete().where('id', playlistId)
 
@@ -290,5 +268,10 @@ export class PlaylistsModel {
         .then(() => {})
         .catch(() => {})
     }
+  }
+
+  async exists(playlistId: string) {
+    const result = await db('playlists').select('*').where('id', playlistId)
+    return result.length === 1
   }
 }

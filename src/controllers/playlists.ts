@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
 
 import { MusicsModel } from '../models/musics'
-import { NotFoundMusics } from '../models/musics/errors'
 import { PlaylistsModel } from '../models/playlists'
-import { NotFoundPlaylists } from '../models/playlists/errors'
-import { AppError, UnknownError } from '../utils/error'
+import { AppError } from '../utils/errors/AppError'
+import { NotFoundPlaylists } from '../utils/errors/NotFoundPlaylists'
+import { UnknownError } from '../utils/errors/UnknownError'
 
 export class PlaylistController {
   async create(req: Request, res: Response) {
@@ -81,34 +81,6 @@ export class PlaylistController {
         if (error instanceof AppError) {
           res.status(error.status).json(error.toJson())
         } else {
-          const unknownError = new UnknownError()
-          res.status(unknownError.status).json(unknownError.toJson())
-        }
-      })
-  }
-
-  async getMusics(req: Request, res: Response) {
-    const pag = (req.query.pag as number | undefined) || 0
-    const withAlbum = (req.query.withAlbum as boolean | undefined) || false
-    const withArtist = (req.query.withArtist as boolean | undefined) || false
-    const { playlistId } = req.params
-
-    const playlistModel = new PlaylistsModel({})
-
-    playlistModel
-      .getMusics(playlistId, withAlbum, withArtist, pag)
-      .then(musics => {
-        if (musics.length) res.json(musics)
-        else {
-          const error = new NotFoundMusics()
-          res.status(error.status).json(error.toJson())
-        }
-      })
-      .catch(error => {
-        if (error instanceof AppError) {
-          res.status(error.status).json(error.toJson())
-        } else {
-          console.log(error)
           const unknownError = new UnknownError()
           res.status(unknownError.status).json(unknownError.toJson())
         }

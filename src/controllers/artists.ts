@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 
 import { ArtistsModel } from '../models/artists'
-import { NotFoundArtists } from '../models/artists/errors'
+import { NotFoundArtists } from '../utils/errors/NotFoundArtists'
 
 const artistsModel = new ArtistsModel()
 

@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
 
 import { SpotifyAuthModel } from '../models/spotifyAuth'
-import { AppError, UnknownError } from '../utils/error'
+import { AppError } from '../utils/errors/AppError'
+import { UnknownError } from '../utils/errors/UnknownError'
 
 const spotifyAuthModel = new SpotifyAuthModel()
 

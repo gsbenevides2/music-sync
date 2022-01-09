@@ -1,8 +1,9 @@
 import { Request, Response } from 'express'
 
 import { AlbumsModel } from '../models/albums'
-import { NotFoundAlbums } from '../models/albums/errors'
-import { AppError, UnknownError } from '../utils/error'
+import { AppError } from '../utils/errors/AppError'
+import { NotFoundAlbums } from '../utils/errors/NotFoundAlbums'
+import { UnknownError } from '../utils/errors/UnknownError'
 
 const albumsModel = new AlbumsModel()
 

@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 
 import { AuthModel } from '../models/auth'
-import { AppError, UnknownError } from '../utils/error'
+import { AppError } from '../utils/errors/AppError'
+import { UnknownError } from '../utils/errors/UnknownError'
 
 const authModel = new AuthModel()
 

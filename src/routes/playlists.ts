@@ -23,13 +23,6 @@ playlistsRoutes.post(
   playlistsValidation.create,
   playlistController.create
 )
-playlistsRoutes.get(
-  '/playlist/:playlistId',
-  authValidantion.authenticate,
-  authController.authenticate,
-  playlistsValidation.listMusics,
-  playlistController.getMusics
-)
 
 playlistsRoutes.post(
   '/playlist/:playlistId/addMusic',

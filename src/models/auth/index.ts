@@ -3,7 +3,9 @@ import { v4 as uuid } from 'uuid'
 
 import { db } from '../../database/db'
 import { compare, encrypt } from '../../utils/cripto'
-import { InvalidGithubUser, SessionNotFound, TokenInvalid } from './errors'
+import { InvalidGithubUser } from '../../utils/errors/InvalidGithubUser'
+import { SessionNotFound } from '../../utils/errors/SessionNotFound'
+import { TokenInvalid } from '../../utils/errors/TokenInvalid'
 import { Session } from './types'
 
 const { GITHUB_CLIENT_ID, GITHUB_SECRET, WEB_CLIENT_HOST } = process.env

@@ -5,9 +5,11 @@ import { playMiddleware } from '../middleware/play'
 import { AlbumsModel } from '../models/albums'
 import { ArtistsModel } from '../models/artists'
 import { MusicsModel } from '../models/musics'
-import { NotFoundMusic, NotFoundMusics } from '../models/musics/errors'
 import { PlaylistsModel } from '../models/playlists'
-import { AppError, UnknownError } from '../utils/error'
+import { AppError } from '../utils/errors/AppError'
+import { NotFoundMusic } from '../utils/errors/NotFoundMusic'
+import { NotFoundMusics } from '../utils/errors/NotFoundMusics'
+import { UnknownError } from '../utils/errors/UnknownError'
 
 export class MusicsController {
   async create(req: Request, res: Response) {
@@ -204,6 +206,36 @@ export class MusicsController {
         if (error instanceof AppError) {
           res.status(error.status).json(error.toJson())
         } else {
+          const unknownError = new UnknownError()
+          res.status(unknownError.status).json(unknownError.toJson())
+        }
+      })
+  }
+
+  async playlist(req: Request, res: Response) {
+    const pag = (req.query.pag as number | undefined) || 0
+    const withAlbum = (req.query.withAlbum as boolean | undefined) || false
+    const withArtist = (req.query.withArtist as boolean | undefined) || false
+    const playlistId = req.params.id as string
+
+    const musicsModel = new MusicsModel({
+      playlistModel: new PlaylistsModel({})
+    })
+
+    musicsModel
+      .getByPlaylist(playlistId, withAlbum, withArtist, pag)
+      .then(musics => {
+        if (musics.length) res.json(musics)
+        else {
+          const error = new NotFoundMusics()
+          res.status(error.status).json(error.toJson())
+        }
+      })
+      .catch(error => {
+        if (error instanceof AppError) {
+          res.status(error.status).json(error.toJson())
+        } else {
+          console.log(error)
           const unknownError = new UnknownError()
           res.status(unknownError.status).json(unknownError.toJson())
         }
