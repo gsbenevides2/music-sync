@@ -3,7 +3,8 @@ import { Server as SocketIoServer } from 'socket.io'
 
 import { AuthModel } from './models/auth'
 import { Downloader } from './utils/download'
-import { AppError, UnknownError } from './utils/errors/AppError'
+import { AppError } from './utils/errors/AppError'
+import { UnknownError } from './utils/errors/UnknownError'
 const authModel = new AuthModel()
 
 export function startSocketIo(httpServer: Server) {
