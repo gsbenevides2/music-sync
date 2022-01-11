@@ -48,7 +48,9 @@ export class PlaylistController {
     const newPosition = req.body.newPosition as number
     const playlistId = req.params.playlistId as string
     const musicId = req.params.musicId as string
-    const playlistsModel = new PlaylistsModel({})
+    const playlistsModel = new PlaylistsModel({
+      musicsModel: new MusicsModel({})
+    })
     playlistsModel
       .rearrange(newPosition, playlistId, musicId)
       .then(() => {
@@ -58,6 +60,7 @@ export class PlaylistController {
         })
       })
       .catch(error => {
+        console.log(error)
         if (error instanceof AppError) {
           res.status(error.status).json(error.toJson())
         } else {
