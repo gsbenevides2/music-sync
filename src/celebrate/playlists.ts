@@ -36,7 +36,7 @@ export const playlistsValidation = {
     }
   }),
   deletePlaylist: celebrate({
-    query: {
+    params: {
       playlistId: Joi.string().required()
     }
   })
