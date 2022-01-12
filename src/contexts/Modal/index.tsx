@@ -1,4 +1,5 @@
 import React from 'react'
+import { CgPlayListRemove } from 'react-icons/cg'
 import {
   MdPlaylistAdd,
   MdDelete,
@@ -12,15 +13,21 @@ import { FetchPlaylists } from '../../services/api/fetchs/playlists'
 import { useMessage } from '../Message/index.'
 import { addToPlaylist } from './AddToPlaylist'
 import { DeleteMusic } from './DeleteMusic'
+import { DeletePlaylist } from './DeletePlaylist'
+import { RemoveFromPlaylist } from './RemoveFromPlaylist'
 
-export type ModalOptions = 'DeleteMusic' | 'AddToPlaylist'
+export type ModalOptions =
+  | 'DeleteMusic'
+  | 'AddToPlaylist'
+  | 'RemoveMusicFromPLaylist'
+  | 'DeletePlaylist'
 
 interface ModalState {
   opened: boolean
   options: ModalOptions[]
-  musicId?: string
+  pageData?: any
   selectPlaylist: boolean
-  reloadScreen?: () => void
+  reloadScreen?: (event: ModalOptions) => void
 }
 
 const initialState: ModalState = {
@@ -80,12 +87,17 @@ export const ModalProvider: React.FC = ({ children }) => {
                 title: playlist.name,
                 icon: MdPlaylistAddCheck,
                 onClick: () => {
-                  addToPlaylist(playlist.id, state.musicId as string).then(
-                    () => {
+                  addToPlaylist(playlist.id, state.pageData.musicId as string)
+                    .then(() => {
                       showMessage('MusicAddedToPlaylist')
                       setState(initialState)
-                    }
-                  )
+                    })
+                    .catch(error => {
+                      console.error(error)
+                      if (error?.response?.data?.code === 'SongAlreadyPlaylist')
+                        showMessage('SongAlreadyPlaylist')
+                      else showMessage('UnknowError')
+                    })
                 }
               }
             })
@@ -108,6 +120,20 @@ export const ModalProvider: React.FC = ({ children }) => {
           }
         })
       }
+      if (state.options.includes('DeletePlaylist')) {
+        items.push({
+          title: 'Deletar Playlist',
+          description: 'Deleta a playlist para sempre.',
+          icon: MdDelete,
+          onClick: () => {
+            DeletePlaylist(state.pageData.playlistId as string).then(() => {
+              state.reloadScreen?.('DeletePlaylist')
+              setState(initialState)
+              showMessage('PlaylistDeleted')
+            })
+          }
+        })
+      }
 
       if (state.options.includes('DeleteMusic')) {
         items.push({
@@ -115,10 +141,27 @@ export const ModalProvider: React.FC = ({ children }) => {
           description: 'Deleta a música para sempre.',
           icon: MdDelete,
           onClick: () => {
-            DeleteMusic(state.musicId as string).then(() => {
-              state.reloadScreen?.()
+            DeleteMusic(state.pageData.musicId as string).then(() => {
+              state.reloadScreen?.('DeleteMusic')
               setState(initialState)
               showMessage('MusicDeleted')
+            })
+          }
+        })
+      }
+      if (state.options.includes('RemoveMusicFromPLaylist')) {
+        items.push({
+          title: 'Remover da Playlist',
+          description: 'Remover a música dessa playlist.',
+          icon: CgPlayListRemove,
+          onClick: () => {
+            RemoveFromPlaylist(
+              state.pageData.playlistId,
+              state.pageData.musicId
+            ).then(() => {
+              state.reloadScreen?.('RemoveMusicFromPLaylist')
+              setState(initialState)
+              showMessage('MusicRemovedFromPlaylist')
             })
           }
         })
@@ -131,7 +174,7 @@ export const ModalProvider: React.FC = ({ children }) => {
     <ModalContext.Provider value={{ state, setState }}>
       <animated.div
         style={stylesToModalAnimation}
-        className="absolute w-screen h-screen top-0 left-0 bg-black z-50 bg-opacity-75"
+        className="absolute w-screen h-screen top-0 left-0 bg-black z-40 bg-opacity-75"
       >
         <div className="relative transform pt-2 w-9/12 h-9/12 realtive inset-1/2 transform -translate-x-1/2 -translate-y-1/2 py-1.5 rounded background-app-color">
           <div className="flex justify-between items-center pl-3 pr-2 pb-2">
@@ -150,7 +193,7 @@ export const useModal = () => {
   const { setState } = React.useContext(ModalContext)
 
   const openModal = (
-    id: string,
+    pageData: any,
     options: ModalOptions[],
     reloadScreen: () => void
   ) => {
@@ -158,7 +201,7 @@ export const useModal = () => {
       opened: true,
       options,
       reloadScreen,
-      musicId: id,
+      pageData,
       selectPlaylist: false
     })
   }

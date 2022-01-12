@@ -13,12 +13,12 @@ import { useMessage } from '../../contexts/Message/index.'
 import { useModal } from '../../contexts/Modal'
 import { MusicListContext } from '../../contexts/MusicList'
 import { PlayerContext } from '../../contexts/Player'
+import api from '../../services/api/api'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
 import { FetchMusics } from '../../services/api/fetchs/musics'
 import { FetchPlaylist } from '../../services/api/fetchs/playlists'
+import { getDatabase } from '../../services/database'
 import { useArrayState } from '../../utils/useArrayState'
-
-// import { MusicsResponse } from '../../services/api.types'
 
 type PageState =
   | 'Loading'
@@ -43,6 +43,62 @@ export const PlaylistScreen: React.FC = () => {
   const showMessage = useMessage()
   const modal = useModal()
 
+  const handleDragInList = React.useCallback(
+    (from: string, to: string) => {
+      const fromItemPosition = musicsArray.value.findIndex(
+        value => value.id === from
+      )
+      const toItemPosition = musicsArray.value.findIndex(
+        value => value.id === to
+      )
+      if (fromItemPosition === toItemPosition) return
+
+      if (fromItemPosition !== toItemPosition) {
+        const fromItem = musicsArray.value[fromItemPosition]
+        let newArray: MusicWithArtistAndAlbum[] = []
+        if (fromItemPosition < toItemPosition) {
+          const part1 = musicsArray.value.slice(0, fromItemPosition)
+          const part2 = musicsArray.value.slice(
+            fromItemPosition + 1,
+            toItemPosition + 1
+          )
+          const part3 = musicsArray.value.slice(toItemPosition + 1)
+          newArray = [...part1, ...part2, fromItem, ...part3]
+          // musicsArray.setValue([...part1, ...part2, fromItem, ...part3])
+        } else if (fromItemPosition > toItemPosition) {
+          const part1 = musicsArray.value.slice(0, toItemPosition)
+          const part2 = musicsArray.value.slice(
+            toItemPosition,
+            fromItemPosition
+          )
+          const part3 = musicsArray.value.slice(fromItemPosition + 1)
+          newArray = [...part1, fromItem, ...part2, ...part3]
+          // musicsArray.setValue()
+        }
+
+        if (navigator.onLine) {
+          musicsArray.setValue(newArray)
+          api
+            .post(`/playlist/${id}/${from}/rearrange`, {
+              newPosition: toItemPosition
+            })
+            .then(async () => {
+              const database = await getDatabase()
+
+              await database.update({
+                in: 'musics_playlists',
+                set: { musics: newArray.map(v => v.id) },
+                where: { playlistId: id }
+              })
+            })
+        } else {
+          showMessage('Offline')
+        }
+      }
+    },
+    [musicsArray.value, id]
+  )
+
   React.useEffect(() => {
     const abort = new AbortController()
     const fetcher = new FetchMusics<MusicWithArtistAndAlbum>({
@@ -56,7 +112,6 @@ export const PlaylistScreen: React.FC = () => {
       event => {
         const musicsFetched = event.detail
         setPageState('Loaded')
-        // setPlaylist(musicsFetched[0].album.name)
         musicsArray.append(musicsFetched)
       },
       { signal: abort.signal }
@@ -102,7 +157,7 @@ export const PlaylistScreen: React.FC = () => {
       const music = musicsArray.value.find(music => music.id === id)
       if (!music || !playerContext) return
       playerContext.playMusic(music)
-      musicListContext?.setMusicList(musicsArray.value)
+      musicListContext?.setValue(musicsArray.value)
     },
     [musicsArray.value]
   )
@@ -112,11 +167,18 @@ export const PlaylistScreen: React.FC = () => {
     if (titlePage) titlePage.innerText = playlistName || 'Carregando Playlist'
   }, [playlistName])
 
-  const onRightClick = React.useCallback((id: string) => {
-    modal.openModal(id, ['AddToPlaylist', 'DeleteMusic'], () => {
-      musicsArray.delete({ id } as MusicWithArtistAndAlbum)
-    })
-  }, [])
+  const onRightClick = React.useCallback(
+    (musicId: string) => {
+      modal.openModal(
+        { musicId, playlistId: id },
+        ['AddToPlaylist', 'DeleteMusic', 'RemoveMusicFromPLaylist'],
+        () => {
+          musicsArray.delete({ id: musicId } as MusicWithArtistAndAlbum)
+        }
+      )
+    },
+    [id]
+  )
 
   let Content
   if (pageState === 'Loading') Content = <LoadingScreen />
@@ -139,6 +201,7 @@ export const PlaylistScreen: React.FC = () => {
         })}
         onClick={musicCallback}
         onRightClick={onRightClick}
+        onDragHandler={handleDragInList}
         minimal
         lowerMargin
       />

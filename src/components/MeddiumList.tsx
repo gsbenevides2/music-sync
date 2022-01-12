@@ -15,17 +15,46 @@ interface Props {
   listOfItems: MediumListItem[]
   onClick?: (id: string) => void
   onRightClick?: (id: string) => void
+  onDragHandler?: (from: string, to: string) => void
 }
 
 const MediumList: React.FC<Props> = props => {
+  const isDragable = Boolean(props.onDragHandler)
+  function handleDragStart(e: React.DragEvent<HTMLElement>, id: string) {
+    if (!isDragable) return
+    e.dataTransfer.dropEffect = 'move'
+    e.dataTransfer.setData('text/plain', id)
+  }
+  function handleDargOver(e: React.DragEvent<HTMLElement>) {
+    if (!isDragable) return
+    e.preventDefault()
+    e.dataTransfer.effectAllowed = 'move'
+  }
+  function handleDrop(e: React.DragEvent<HTMLElement>, id: string) {
+    if (!isDragable) return
+    e.preventDefault()
+    const from = e.dataTransfer.getData('text/plain')
+    props.onDragHandler?.(from, id)
+  }
+
   return (
     <ul className={props.ulClassName} style={props.ulStyle}>
       {props.listOfItems.map(item => (
         <li
           key={item.id}
-          className="flex justify-between hover-black pointer p-2 "
+          className={`flex ${
+            isDragable ? 'cursor-move' : 'cursor-pointer'
+          } justify-between hover-black pointer p-2`}
           onClick={() => props.onClick?.(item.id)}
-          onContextMenu={() => props.onRightClick?.(item.id)}
+          onContextMenu={e => {
+            props.onRightClick?.(item.id)
+          }}
+          draggable={isDragable}
+          onDragStart={e => {
+            handleDragStart(e, item.id)
+          }}
+          onDragOver={handleDargOver}
+          onDrop={e => handleDrop(e, item.id)}
         >
           <div className="flex">
             <ImageSpecial
@@ -48,4 +77,4 @@ const MediumList: React.FC<Props> = props => {
   )
 }
 
-export default MediumList
+export default React.memo(MediumList)

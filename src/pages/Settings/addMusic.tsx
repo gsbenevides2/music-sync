@@ -11,7 +11,6 @@ import { useMessage } from '../../contexts/Message/index.'
 import api from '../../services/api/api'
 import { MusicCreated } from '../../services/api/apiTypes'
 import { FetchMusic } from '../../services/api/fetchs/musics'
-import { getURLVideoID } from '../../utils/youtubeUrl'
 
 interface YTMusic {
   youtubeId: string
@@ -27,29 +26,23 @@ interface YTMusic {
 type PageState = 'SpotifyUrl' | 'Loading' | 'YoutubeUrl' | 'Success'
 
 const AddMusicScreen: React.FC = () => {
-  const [spotifyUrl, setSpotifyUrl] = React.useState('')
+  const [spotifyLink, setSpotifyLink] = React.useState('')
   const [requestWait, setRequestWait] = React.useState(false)
   const [youtubeMusics, setYoutubeMusics] = React.useState<YTMusic[]>([])
-  const [youtubeUrl, setYoutubeUrl] = React.useState<string>('')
+  const [youtubeLink, setYoutubeLink] = React.useState<string>('')
   const [pageState, setPageState] = React.useState<PageState>('SpotifyUrl')
   const showMessage = useMessage()
 
   const submit = React.useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      if (navigator.onLine === false) return showMessage('Offline')
       setRequestWait(true)
-      const youtubeId = youtubeUrl ? getURLVideoID(youtubeUrl) : null
+      const body = youtubeLink.length
+        ? { youtubeLink, spotifyLink }
+        : { spotifyLink }
       api
-        .post<MusicCreated>(
-          '/music',
-          youtubeId
-            ? {
-                spotifyLink: spotifyUrl,
-                useYoutubeId: youtubeId
-              }
-            : {
-                spotifyLink: spotifyUrl
-              }
-        )
+        .post<MusicCreated>('/music', body)
         .then(result => {
           const fetcher = new FetchMusic(
             { withAlbum: true, withArtist: true },
@@ -71,9 +64,8 @@ const AddMusicScreen: React.FC = () => {
           }
           setRequestWait(false)
         })
-      e.preventDefault()
     },
-    [spotifyUrl, youtubeUrl]
+    [spotifyLink, youtubeLink]
   )
   const Header = (
     <Helmet>
@@ -96,8 +88,8 @@ const AddMusicScreen: React.FC = () => {
           <Input
             id="spotifyUrl"
             label="Insira a url do Spotify:"
-            value={spotifyUrl}
-            setValue={setSpotifyUrl}
+            value={spotifyLink}
+            setValue={setSpotifyLink}
             required
             autoComplete="off"
           />
@@ -115,8 +107,8 @@ const AddMusicScreen: React.FC = () => {
           <Input
             id="youtubeUrl"
             label="Insira a url do Youtube ou escolha uma das sugestões abaixo:"
-            value={youtubeUrl}
-            setValue={setYoutubeUrl}
+            value={youtubeLink}
+            setValue={setYoutubeLink}
             required
             autoComplete="off"
           />
@@ -129,7 +121,7 @@ const AddMusicScreen: React.FC = () => {
                 className="w-full gap-2 flex cursor-pointer duration-300 transform scale-95 hover:scale-100 hover:bg-app-200 hover:text-app-900 p-1 rounded"
                 key={music.youtubeId}
                 onClick={() =>
-                  setYoutubeUrl(
+                  setYoutubeLink(
                     `https://www.youtube.com/watch?v=${music.youtubeId}`
                   )
                 }

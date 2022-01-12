@@ -27,7 +27,6 @@ export const SocialAuthManagerScreen: React.FC = () => {
         if (authState === 'ok') {
           setSpotify(true)
           showMessage('SpotifyOK')
-          console.log(interval)
           clearInterval(interval)
         }
       }, 1000)
@@ -59,6 +58,7 @@ export const SocialAuthManagerScreen: React.FC = () => {
         setYoutube(result.data.result)
       })
     }
+    if (navigator.onLine === false) return showMessage('Offline')
     loadData()
   }, [])
   const items: OptionsItem[] = []

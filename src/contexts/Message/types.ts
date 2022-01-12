@@ -61,9 +61,29 @@ export const messages = {
     type: 'success',
     text: 'Música adicionada a playlist!'
   },
-  MusicDeleted : {
-    type:'success',
-    text:'Música deletada com sucesso!'
+  MusicDeleted: {
+    type: 'success',
+    text: 'Música deletada com sucesso!'
+  },
+  PlaylistDeleted: {
+    type: 'success',
+    text: 'Playlist deletada com sucesso!'
+  },
+  MusicRemovedFromPlaylist: {
+    type: 'success',
+    text: 'Música removida com sucesso da playlist!'
+  },
+  SongAlreadyPlaylist: {
+    type: 'error',
+    text: 'A música já está nessa playlist.'
+  },
+  InvalidYoutubeVideo: {
+    type: 'error',
+    text: 'Video invalido, tente um outro link.'
+  },
+  Offline: {
+    type: 'error',
+    text: 'Você está sem intenet!'
   }
 }
 

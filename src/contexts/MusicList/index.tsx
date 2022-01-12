@@ -1,21 +1,19 @@
 import React from 'react'
 
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
+import { Returned as Context, useArrayState } from '../../utils/useArrayState'
 
-interface Context {
-  musicList: MusicWithArtistAndAlbum[]
-  setMusicList: React.Dispatch<React.SetStateAction<MusicWithArtistAndAlbum[]>>
-}
-
-export const MusicListContext = React.createContext<Context | null>(null)
+export const MusicListContext =
+  React.createContext<Context<MusicWithArtistAndAlbum> | null>(null)
 
 export const MusicListContextProvider: React.FC = ({ children }) => {
-  const [musicList, setMusicList] = React.useState<MusicWithArtistAndAlbum[]>(
-    []
-  )
+  const musicList = useArrayState<MusicWithArtistAndAlbum>({
+    initialState: [],
+    equalsFunction: (a, b) => a.id === b.id
+  })
 
   return (
-    <MusicListContext.Provider value={{ musicList, setMusicList }}>
+    <MusicListContext.Provider value={musicList}>
       {children}
     </MusicListContext.Provider>
   )

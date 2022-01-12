@@ -1,6 +1,7 @@
 import React from 'react'
 
 export interface OptionsItem {
+  id?: string
   title: string
   description?: string
   icon: React.FC<{ size: number }>
@@ -9,7 +10,8 @@ export interface OptionsItem {
 
 interface Props {
   ulClassName?: string
-  items: OptionsItem[]
+  items: Array<OptionsItem>
+  onRightClick?: (id: string) => void
 }
 
 export const OptionsList: React.FC<Props> = props => {
@@ -29,6 +31,10 @@ export const OptionsList: React.FC<Props> = props => {
         <li
           key={item.title}
           onClick={item.onClick}
+          onContextMenu={e => {
+            e.preventDefault()
+            props.onRightClick?.(item.id || '')
+          }}
           className="flex w-full items-center hover:bg-app-200 hover:text-app-900 pl-3 py-1.5 duration-300"
         >
           <div>{item.icon({ size: 30 })}</div>

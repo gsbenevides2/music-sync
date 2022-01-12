@@ -25,8 +25,9 @@ export const CreatePlaylistScreen: React.FC = () => {
 
   const formSubmit: React.FormEventHandler<HTMLFormElement> = React.useCallback(
     ev => {
-      setPageState('Loading')
       ev.preventDefault()
+      if (navigator.onLine === false) return showMessage('Offline')
+      setPageState('Loading')
       api
         .post<Response>('/playlist', { name })
         .then(response => {

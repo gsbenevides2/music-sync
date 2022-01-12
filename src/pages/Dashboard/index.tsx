@@ -73,13 +73,13 @@ const DashboardScreen: React.FC = () => {
       const music = musicsArray.value.find(music => music.id === id)
       if (!music || !playerContext) return
       playerContext.playMusic(music)
-      musicListContext?.setMusicList(musicsArray.value)
+      musicListContext?.setValue(musicsArray.value)
     },
     [musicsArray.value]
   )
-  const onRightClick = React.useCallback((id: string) => {
-    modal.openModal(id, ['AddToPlaylist', 'DeleteMusic'], () => {
-      musicsArray.delete({ id } as MusicWithArtistAndAlbum)
+  const onRightClick = React.useCallback((musicId: string) => {
+    modal.openModal({ musicId }, ['AddToPlaylist', 'DeleteMusic'], () => {
+      musicsArray.delete({ id: musicId } as MusicWithArtistAndAlbum)
     })
   }, [])
 

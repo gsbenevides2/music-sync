@@ -45,13 +45,13 @@ export const PlayerContextProvider: React.FC = ({ children }) => {
 
   const playMusic = usePlayMusic(audio, setActualMusic, setWaiting)
   const nextMusic = useNextMusic(
-    musicListContext?.musicList || [],
+    musicListContext?.value || [],
     actualMusic,
     playMusic
   )
   const playOrPause = usePlayOrPause(audio)
   const previousMusic = usePreviousMusic(
-    musicListContext?.musicList || [],
+    musicListContext?.value || [],
     actualMusic,
     playMusic
   )

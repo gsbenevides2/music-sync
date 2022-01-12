@@ -15,15 +15,35 @@ interface Props {
   onRightClick?: (id: string) => void
   minimal?: boolean
   lowerMargin?: boolean
+  onDragHandler?: (from: string, to: string) => void
 }
 
 const LaggerList: React.FC<Props> = props => {
+  const isDragable = Boolean(props.onDragHandler)
+
+  function handleDragStart(e: React.DragEvent<HTMLElement>, id: string) {
+    if (!isDragable) return
+    e.dataTransfer.dropEffect = 'move'
+    e.dataTransfer.setData('text/plain', id)
+  }
+  function handleDargOver(e: React.DragEvent<HTMLElement>) {
+    if (!isDragable) return
+    e.preventDefault()
+    e.dataTransfer.effectAllowed = 'move'
+  }
+  function handleDrop(e: React.DragEvent<HTMLElement>, id: string) {
+    if (!isDragable) return
+    e.preventDefault()
+    const from = e.dataTransfer.getData('text/plain')
+    props.onDragHandler?.(from, id)
+  }
+
   return (
     <ul
       className="flex flex-auto flex-wrap gap-3 justify-center overflow-y-auto hiden-scroll py-1"
       style={{
         maxWidth: '800px',
-        height: `calc(100vh - (0.75rem + ${
+        maxHeight: `calc(100vh - (0.75rem + ${
           (props.minimal ? 28 : 90) + (props.lowerMargin ? 4 : 12)
         }px + var(--player-height) + 0.50rem))`
       }}
@@ -32,18 +52,24 @@ const LaggerList: React.FC<Props> = props => {
         <li
           key={item.id}
           style={{ maxHeight: 184 }}
-          className="w-24 cursor-pointer duration-300 transform scale-100 hover:scale-105 hover:bg-app-200 hover:text-app-900 p-1 rounded"
+          className={`w-24 ${
+            isDragable ? 'cursor-move' : 'cursor-pointer'
+          } duration-300 transform scale-100 hover:scale-105 hover:bg-app-200 hover:text-app-900 p-1 rounded`}
           onClick={() => props.onClick?.(item.id)}
           onContextMenu={e => {
             e.preventDefault()
             props.onRightClick?.(item.id)
-            return false
           }}
+          draggable={isDragable}
+          onDragStart={e => handleDragStart(e, item.id)}
+          onDragOver={handleDargOver}
+          onDrop={e => handleDrop(e, item.id)}
         >
           <ImageSpecial
             src={item.imageSrc}
             className="h-24 w-24"
             loading="lazy"
+            draggable={!isDragable}
           />
           <p className="break-words overflow-hidden" style={{ height: 46 }}>
             {item.title}

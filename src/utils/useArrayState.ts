@@ -6,7 +6,7 @@ interface Options<T> {
   equalsFunction?: (a: T, b: T) => boolean
 }
 
-interface Returned<T> {
+export interface Returned<T> {
   value: T[]
   setValue: React.Dispatch<React.SetStateAction<T[]>>
   append: (appendArray: T[]) => void

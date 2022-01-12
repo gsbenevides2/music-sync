@@ -18,7 +18,6 @@ export function useKeyboardToHandleEvents(
       'keydown',
       e => {
         const keyCode = e.code
-        console.log('keycode', keyCode)
         if (e.code === 'Space') {
           if (audio.current.paused) audio.current.play()
           else audio.current.pause()

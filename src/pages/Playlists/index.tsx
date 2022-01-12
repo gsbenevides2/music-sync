@@ -10,6 +10,7 @@ import { LoadingScreen } from '../../components/ScreenMessager/LoadingScreen'
 import { OfflineScreen } from '../../components/ScreenMessager/OfflineScreen'
 import { ServerErrorScreen } from '../../components/ScreenMessager/ServerErrorScreen'
 import { useMessage } from '../../contexts/Message/index.'
+import { useModal } from '../../contexts/Modal'
 import { Playlist } from '../../services/api/apiTypes'
 import { FetchPlaylists } from '../../services/api/fetchs/playlists'
 import { orderByPropety } from '../../utils/orderByProperty'
@@ -26,9 +27,11 @@ function PlaylistsScreen() {
   const [pageState, setPageState] = React.useState<PageState>('Loading')
   const showMessage = useMessage()
   const history = useHistory()
+  const modal = useModal()
 
   const items: OptionsItem[] = playlistsArray.value.map(playlist => {
     return {
+      id: playlist.id,
       icon: MdPlaylistAddCheck,
       title: playlist.name,
       onClick: () => history.push(`/dashboard/playlist/${playlist.id}`)
@@ -61,6 +64,12 @@ function PlaylistsScreen() {
     fetcher.start()
   }, [])
 
+  const onRightClick = React.useCallback((playlistId: string) => {
+    modal.openModal({ playlistId }, ['DeletePlaylist'], () => {
+      playlistsArray.delete({ id: playlistId } as Playlist)
+    })
+  }, [])
+
   let Content
   if (pageState === 'Offline') Content = <OfflineScreen />
   else if (pageState === 'Empty')
@@ -72,6 +81,7 @@ function PlaylistsScreen() {
       <OptionsList
         ulClassName="relative transform pt-1.5 w-screen"
         items={items}
+        onRightClick={onRightClick}
       />
     )
   else if (pageState === 'Loading') Content = <LoadingScreen />

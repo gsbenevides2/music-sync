@@ -40,9 +40,13 @@ const Player: React.FC = () => {
   }, [isOpenPlaylist])
 
   React.useEffect(() => {
-    setPlayerHeight((14 * window.innerHeight) / 100)
+    let playerHeight = (14 * window.innerHeight) / 100
+    if (playerHeight < 73.64) playerHeight = 73.64
+    setPlayerHeight(playerHeight)
     window.addEventListener('resize', () => {
-      setPlayerHeight((14 * window.innerHeight) / 100)
+      let playerHeight = (14 * window.innerHeight) / 100
+      if (playerHeight < 73.64) playerHeight = 73.64
+      setPlayerHeight(playerHeight)
     })
   }, [])
 
@@ -79,6 +83,41 @@ const Player: React.FC = () => {
     }
   }, [vibrantColors])
 
+  const handleDragInList = React.useCallback(
+    (from: string, to: string) => {
+      const fromItemPosition = musicListContext.value.findIndex(
+        value => value.id === from
+      )
+      const toItemPosition = musicListContext.value.findIndex(
+        value => value.id === to
+      )
+      if (fromItemPosition === toItemPosition) return
+      // const toItem = musicsArray.value[toItemPosition]
+      const fromItem = musicListContext.value[fromItemPosition]
+
+      if (fromItemPosition !== toItemPosition) {
+        if (fromItemPosition < toItemPosition) {
+          const part1 = musicListContext.value.slice(0, fromItemPosition)
+          const part2 = musicListContext.value.slice(
+            fromItemPosition + 1,
+            toItemPosition + 1
+          )
+          const part3 = musicListContext.value.slice(toItemPosition + 1)
+          musicListContext.setValue([...part1, ...part2, fromItem, ...part3])
+        } else if (fromItemPosition > toItemPosition) {
+          const part1 = musicListContext.value.slice(0, toItemPosition)
+          const part2 = musicListContext.value.slice(
+            toItemPosition,
+            fromItemPosition
+          )
+          const part3 = musicListContext.value.slice(fromItemPosition + 1)
+          musicListContext.setValue([...part1, fromItem, ...part2, ...part3])
+        }
+      }
+    },
+    [musicListContext.value]
+  )
+
   return (
     <Animated.div
       style={stylesOfAnimationToOpenAndClosePlayer}
@@ -86,7 +125,10 @@ const Player: React.FC = () => {
     >
       {playerContext.actualMusic ? (
         <>
-          <div className="bottombar  px-4 " style={{ height: playerHeight }}>
+          <div
+            className="bottombar  px-4 "
+            style={{ height: playerHeight, minHeight: '73.64px' }}
+          >
             <DurationBarMemo
               playedColor={vibrantColors.data.lightVibrant || 'blue'}
               thumbColor={vibrantColors.data.vibrant || 'darkblue'}
@@ -148,7 +190,7 @@ const Player: React.FC = () => {
           </div>
           <h2 className="p-2">Lista de Reprodução Atual:</h2>
           <MediumList
-            listOfItems={musicListContext.musicList.map(music => {
+            listOfItems={musicListContext.value.map(music => {
               return {
                 id: music.id,
                 title: music.name,
@@ -156,12 +198,13 @@ const Player: React.FC = () => {
                 subtitle: music.artist.name
               }
             })}
+            onDragHandler={handleDragInList}
             ulClassName="overflow-y-scroll hiden-scroll"
             ulStyle={{
               height: `calc(100vh - ${playerHeight + 40 + 24}px)`
             }}
             onClick={musicId => {
-              const music = musicListContext.musicList.find(
+              const music = musicListContext.value.find(
                 music => music.id === musicId
               )
               if (music) playerContext.playMusic(music)
