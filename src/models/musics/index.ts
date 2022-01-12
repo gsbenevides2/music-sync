@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid'
 import { db } from '../../database/db'
 import { SpotifyService } from '../../services/spotify'
 import { YoutubeService } from '../../services/youtube'
+import { InvalidYoutubeVideo } from '../../utils/errors/InvalidYoutubeVideo'
 import { MusicAlreadyExists } from '../../utils/errors/MusicAlreadyExists'
 import { NotFoundAlbum } from '../../utils/errors/NotFoundAlbum'
 import { NotFoundArtist } from '../../utils/errors/NotFoundArtist'
@@ -39,7 +40,7 @@ export class MusicsModel {
     this.playlistModel = options.playlistModel
   }
 
-  async create(spotifyLink: string, useYoutubeId?: string) {
+  async create(spotifyLink: string, youtubeLink?: string) {
     if (!this.artistsModel) throw new Error('Invalid Artist Model')
     if (!this.albumsModel) throw new Error('Invalid Album Model')
 
@@ -58,11 +59,14 @@ export class MusicsModel {
     )
 
     let youtubeId: string
-    if (useYoutubeId) {
-      youtubeId = useYoutubeId
+    if (youtubeLink) {
+      youtubeId = this.youtubeService.getIdFromLink(youtubeLink)
     } else if (typeof youtubeData === 'string') {
       youtubeId = youtubeData
     } else throw new SelectYoutubeMusic(youtubeData)
+
+    const verifyVideo = await this.youtubeService.verifyYoutubeVideo(youtubeId)
+    if (!verifyVideo) throw new InvalidYoutubeVideo()
 
     let artistTableId
     const artistInDb = await this.artistsModel.findBySpotifyIdReturnOnlyId(

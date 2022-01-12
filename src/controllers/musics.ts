@@ -14,7 +14,7 @@ import { UnknownError } from '../utils/errors/UnknownError'
 export class MusicsController {
   async create(req: Request, res: Response) {
     const spotifylink = req.body.spotifyLink as string
-    const useYoutubeId = req.body.useYoutubeId as string | undefined
+    const youtubeLink = req.body.youtubeLink as string | undefined
 
     const musicsModel = new MusicsModel({
       artistsModel: new ArtistsModel(),
@@ -22,7 +22,7 @@ export class MusicsController {
     })
 
     musicsModel
-      .create(spotifylink, useYoutubeId)
+      .create(spotifylink, youtubeLink)
       .then(id => {
         res.status(201).send({
           code: 'MusicCreated',

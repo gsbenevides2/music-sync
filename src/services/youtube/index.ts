@@ -3,6 +3,7 @@ import { google } from 'googleapis'
 import ytMusic from 'node-youtube-music'
 import { MusicVideo } from 'node-youtube-music/dist/src/models'
 import { v4 as uuid } from 'uuid'
+import ytdl from 'ytdl-core'
 
 import { db } from '../../database/db'
 import { decrypt, encrypt } from '../../utils/cripto'
@@ -253,5 +254,27 @@ export class YoutubeService {
     await this.authenticate()
 
     await this.ytApi.playlists.delete({ id: ytPlaylistId })
+  }
+
+  verifyYoutubeVideo(videoId: string) {
+    return new Promise<boolean>(resolve => {
+      const link = this.getLinkFromId(videoId)
+      ytdl
+        .getInfo(link)
+        .then(() => {
+          resolve(true)
+        })
+        .catch(() => {
+          resolve(false)
+        })
+    })
+  }
+
+  getLinkFromId(videoId: string) {
+    return `https://www.youtube.com/watch?v=${videoId}`
+  }
+
+  getIdFromLink(videoLink: string) {
+    return ytdl.getVideoID(videoLink)
   }
 }

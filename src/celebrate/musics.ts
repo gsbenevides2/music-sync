@@ -3,8 +3,14 @@ import { celebrate, Joi } from 'celebrate'
 export const musicsValidation = {
   create: celebrate({
     body: {
-      spotifyLink: Joi.string().required(),
-      useYoutubeId: Joi.string().optional()
+      spotifyLink: Joi.string()
+        .required()
+        .regex(/https?:\/\/(open.)?spotify.com\/track\/\w{22}/),
+      youtubeLink: Joi.string()
+        .optional()
+        .regex(
+          /^https?:\/\/(gaming|m|music|youtu\.be\/|(www\.)?youtube\.com\/(|embed|v|shorts))/
+        )
     }
   }),
 
@@ -25,7 +31,7 @@ export const musicsValidation = {
   }),
   play: celebrate({
     query: {
-      ytId: Joi.string().required(),
+      ytId: Joi.string().required().length(11),
       authorization: Joi.string().required(),
       sessionid: Joi.string().required()
     }
