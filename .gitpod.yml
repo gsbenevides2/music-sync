@@ -1,0 +1,4 @@
+tasks:
+  - name: Start development environment
+    init: yarn install
+    command: yarn run start
