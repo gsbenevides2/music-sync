@@ -87,12 +87,12 @@ export class FetchPlaylists extends EventTarget {
 
   private async saveInDb() {
     const deleteValues: string[] = []
-    const updateValues: Playlist[] = []
+    const updateValues: Playlist[] = this.apiResult
 
     this.dbResult.forEach(result => {
-      if (this.apiResult.findIndex(test => test.id === result.id) !== -1) {
-        updateValues.push(result)
-      } else deleteValues.push(result.id)
+      if (this.apiResult.findIndex(test => test.id === result.id) === -1) {
+        deleteValues.push(result.id)
+      }
     })
 
     const database = await getDatabase()

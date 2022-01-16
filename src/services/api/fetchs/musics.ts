@@ -218,12 +218,12 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
 
   private async saveInDb() {
     const deleteValues: Type[] = []
-    const updateValues: Type[] = []
+    const updateValues: Type[] = this.apiResult
 
     this.dbResult.forEach(result => {
-      if (this.apiResult.findIndex(test => test.id === result.id) !== -1) {
-        updateValues.push(result)
-      } else deleteValues.push(result)
+      if (this.apiResult.findIndex(test => test.id === result.id) === -1) {
+        deleteValues.push(result)
+      }
     })
 
     const database = await getDatabase()
@@ -287,7 +287,6 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
 
       return m.id
     })
-
     await Promise.all([
       database.insert({
         into: 'artists',
