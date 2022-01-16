@@ -10,8 +10,8 @@ import { getNetworkState, NetworkState } from './utils'
 
 export class FetchArtists extends EventTarget {
   networkState: NetworkState
-  apiResult:Artist[] = []
-  dbResult:Artist[] = []
+  apiResult: Artist[] = []
+  dbResult: Artist[] = []
   constructor() {
     super()
     this.networkState = getNetworkState()
@@ -41,16 +41,15 @@ export class FetchArtists extends EventTarget {
           detail: result
         })
         this.dispatchEvent(dataEvent)
-        this.apiResult = [...this.apiResult,...result]
+        this.apiResult = [...this.apiResult, ...result]
         page++
       } catch (error: any) {
         const code: string =
           error.code || error.response?.data?.code || 'Unknoow Error'
-        if (code === 'NotFoundArtists' && page > 0){
+        if (code === 'NotFoundArtists' && page > 0) {
           save = true
           break
-        }
-        else if (this.networkState === 'db first' || page > 0) {
+        } else if (this.networkState === 'db first' || page > 0) {
           const dataEvent = new CustomEvent<string>('error', {
             detail: 'NotLoadAllArtists'
           })
@@ -63,7 +62,7 @@ export class FetchArtists extends EventTarget {
         }
       }
     }
-    if(save) await this.saveInDb()
+    if (save) await this.saveInDb()
   }
 
   private async goToDbFirst() {
@@ -107,12 +106,12 @@ export class FetchArtists extends EventTarget {
 
   private async saveInDb() {
     const deleteValues: string[] = []
-    const updateValues: Artist[] = []
+    const updateValues: Artist[] = this.apiResult
 
     this.dbResult.forEach(result => {
-      if (this.apiResult.findIndex(test => test.id === result.id) !== -1) {
-        updateValues.push(result)
-      } else deleteValues.push(result.id)
+      if (this.apiResult.findIndex(test => test.id === result.id) === -1) {
+        deleteValues.push(result.id)
+      }
     })
 
     const database = await getDatabase()
