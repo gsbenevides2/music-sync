@@ -89,7 +89,7 @@ const LaggerList: React.FC<Props> = props => {
   }
   const items = props.listOfItems.slice(
     0,
-    calculateItems(props.minimal, props.lowerMargin).gridItems * renderPage
+    calculateItems(props.minimal, props.lowerMargin).gridItems + 1 * renderPage
   )
 
   return (
