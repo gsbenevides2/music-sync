@@ -18,7 +18,47 @@ interface Props {
   onDragHandler?: (from: string, to: string) => void
 }
 
+export const calculateItems = (minimal?: boolean, lowerMargin?: boolean) => {
+  function convertRemToPixels(rem: number) {
+    return rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
+  }
+  const pH = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue(
+      '--player-height'
+    )
+  )
+  const contentHeight =
+    window.innerHeight -
+    (convertRemToPixels(0.75) +
+      (minimal ? 28 : 90) +
+      (lowerMargin ? 4 : 12) +
+      pH +
+      convertRemToPixels(0.5))
+
+  const itemWidth = convertRemToPixels(6)
+  const itemHeight = 170
+  const lines = parseInt((contentHeight / 162).toFixed())
+  const columns = Math.floor(
+    (Math.min(window.innerWidth, 800) + convertRemToPixels(0.75)) /
+      (convertRemToPixels(6) + convertRemToPixels(0.75))
+  )
+
+  const contentWidth = Math.min(800, window.innerWidth)
+  const gridItems = lines * columns
+
+  return {
+    gridItems,
+    lines,
+    columns,
+    contentHeight,
+    itemWidth,
+    itemHeight,
+    contentWidth
+  }
+}
+
 const LaggerList: React.FC<Props> = props => {
+  const [renderPage, setRenderPage] = React.useState(1)
   const isDragable = Boolean(props.onDragHandler)
 
   function handleDragStart(e: React.DragEvent<HTMLElement>, id: string) {
@@ -38,6 +78,20 @@ const LaggerList: React.FC<Props> = props => {
     props.onDragHandler?.(from, id)
   }
 
+  function handleOnScroll(e: React.UIEvent<HTMLUListElement>) {
+    const element = e.currentTarget
+    if (
+      element.clientHeight + Math.floor(element.scrollTop) ===
+      element.scrollHeight
+    ) {
+      setRenderPage(v => v + 1)
+    }
+  }
+  const items = props.listOfItems.slice(
+    0,
+    calculateItems(props.minimal, props.lowerMargin).gridItems * renderPage
+  )
+
   return (
     <ul
       className="flex flex-auto flex-wrap gap-3 justify-center overflow-y-auto hiden-scroll py-1"
@@ -47,8 +101,9 @@ const LaggerList: React.FC<Props> = props => {
           (props.minimal ? 28 : 90) + (props.lowerMargin ? 4 : 12)
         }px + var(--player-height) + 0.50rem))`
       }}
+      onScroll={e => handleOnScroll(e)}
     >
-      {props.listOfItems.map(item => (
+      {items.map(item => (
         <li
           key={item.id}
           style={{ maxHeight: 184 }}
@@ -64,6 +119,7 @@ const LaggerList: React.FC<Props> = props => {
           onDragStart={e => handleDragStart(e, item.id)}
           onDragOver={handleDargOver}
           onDrop={e => handleDrop(e, item.id)}
+          onScroll={e => console.log(e)}
         >
           <ImageSpecial
             src={item.imageSrc}

@@ -154,7 +154,7 @@ export class FetchMusics<Type extends ResultNotArray> extends EventTarget {
       musics = await database.select<Music>({
         from: 'musics',
         where: {
-          artistId: findByPlaylistId as string
+          artistId: findByArtistId as string
         }
       })
     } else if (findByAlbumId) {
