@@ -18,6 +18,7 @@ interface Props {
   onDragHandler?: (from: string, to: string) => void
 }
 
+/*
 export const calculateItems = (minimal?: boolean, lowerMargin?: boolean) => {
   function convertRemToPixels(rem: number) {
     return rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
@@ -56,9 +57,10 @@ export const calculateItems = (minimal?: boolean, lowerMargin?: boolean) => {
     contentWidth
   }
 }
+*/
 
 const LaggerList: React.FC<Props> = props => {
-  const [renderPage, setRenderPage] = React.useState(1)
+  // const [renderPage, setRenderPage] = React.useState(1)
   const isDragable = Boolean(props.onDragHandler)
 
   function handleDragStart(e: React.DragEvent<HTMLElement>, id: string) {
@@ -78,6 +80,7 @@ const LaggerList: React.FC<Props> = props => {
     props.onDragHandler?.(from, id)
   }
 
+  /*
   function handleOnScroll(e: React.UIEvent<HTMLUListElement>) {
     const element = e.currentTarget
     if (
@@ -91,6 +94,7 @@ const LaggerList: React.FC<Props> = props => {
     0,
     calculateItems(props.minimal, props.lowerMargin).gridItems + 1 * renderPage
   )
+  */
 
   return (
     <ul
@@ -101,9 +105,8 @@ const LaggerList: React.FC<Props> = props => {
           (props.minimal ? 28 : 90) + (props.lowerMargin ? 4 : 12)
         }px + var(--player-height) + 0.50rem))`
       }}
-      onScroll={e => handleOnScroll(e)}
     >
-      {items.map(item => (
+      {props.listOfItems.map(item => (
         <li
           key={item.id}
           style={{ maxHeight: 184 }}

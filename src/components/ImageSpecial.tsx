@@ -14,6 +14,7 @@ export const ImageSpecial: React.FC<
   >
 > = props => {
   const [url, setUrl] = React.useState(ImageShimmer)
+  const imageRef = React.createRef<HTMLImageElement>()
 
   const onError = React.useCallback(() => {
     console.log(url, props.src)
@@ -58,32 +59,45 @@ export const ImageSpecial: React.FC<
   }
 
   React.useEffect(() => {
-    const offline = getSetting(OFFLINE_KEY)
-    const offlinePriority = getSetting(OFFLINE_PRIORITY_KEY)
-    const onLine = navigator.onLine
-    if (onLine) {
-      if (offline && offlinePriority)
-        fetchLocalhost(() => {
-          fetchWeb(() => {
-            setUrl(props.src || ImageShimmer)
-          })
-        })
-      else
-        fetchWeb(() => {
-          setUrl(props.src || ImageShimmer)
-        })
-    } else {
-      if (offline)
-        fetchLocalhost(() => {
-          setUrl(props.src || ImageShimmer)
-        })
-      else setUrl(ImageShimmer)
+    if (imageRef.current) {
+      console.log('oi')
+      const imageObserver = new IntersectionObserver(e => {
+        if (e[0].isIntersecting) {
+          const offline = getSetting(OFFLINE_KEY)
+          const offlinePriority = getSetting(OFFLINE_PRIORITY_KEY)
+          const onLine = navigator.onLine
+          if (onLine) {
+            if (offline && offlinePriority)
+              fetchLocalhost(() => {
+                fetchWeb(() => {
+                  setUrl(props.src || ImageShimmer)
+                })
+              })
+            else
+              fetchWeb(() => {
+                setUrl(props.src || ImageShimmer)
+              })
+          } else {
+            if (offline)
+              fetchLocalhost(() => {
+                setUrl(props.src || ImageShimmer)
+              })
+            else setUrl(ImageShimmer)
+          }
+        }
+      })
+      imageObserver.observe(imageRef.current)
+
+      return () => {
+        imageObserver.disconnect()
+      }
     }
-  }, [props.src])
+  }, [props.src, imageRef])
 
   return (
     <img
       {...props}
+      ref={imageRef}
       src={url}
       loading="lazy"
       alt="Algum texto aqui."
