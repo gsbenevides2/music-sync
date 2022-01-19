@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { createState, DevTools, useState } from '@hookstate/core'
+import { createState, useState } from '@hookstate/core'
 import { Persistence } from '@hookstate/persistence'
 
 import { VOLUME_KEY } from '../../utils/settings/keys'
@@ -11,7 +11,6 @@ import { volumeUpHelper } from '../helpers/volumeUpHelper'
 export type VolumeStateType = number
 
 export const volumeGlobalState = createState<VolumeStateType>(0)
-DevTools(volumeGlobalState).label('Volume')
 
 export const useVolumeState = () => {
   return useState(volumeGlobalState)

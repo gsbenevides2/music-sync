@@ -1,14 +1,12 @@
 import React from 'react'
 
-import { createState, useState, DevTools } from '@hookstate/core'
+import { createState, useState } from '@hookstate/core'
 
 import { getAudioElement } from '../AudioPlayerElement'
 
 export type WaitingStateType = boolean
 
 export const waitingGlobalState = createState<WaitingStateType>(false)
-
-DevTools(waitingGlobalState).label('Waiting')
 
 export const useWaitingState = () => {
   return useState(waitingGlobalState)

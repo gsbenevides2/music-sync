@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { createState, useState, DevTools } from '@hookstate/core'
+import { createState, useState } from '@hookstate/core'
 
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
 import { getAudioElement } from '../AudioPlayerElement'
@@ -13,8 +13,6 @@ import { useMusicListState } from './musicList'
 export type ActualMusicStateType = MusicWithArtistAndAlbum | null
 
 export const actualMusicGlobalState = createState<ActualMusicStateType>(null)
-
-DevTools(actualMusicGlobalState).label('ActualMusic')
 
 export const useActualMusicState = () => {
   return useState(actualMusicGlobalState)

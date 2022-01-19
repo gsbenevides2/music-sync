@@ -1,13 +1,12 @@
 import React from 'react'
 
-import { createState, DevTools, useState } from '@hookstate/core'
+import { createState, useState } from '@hookstate/core'
 
 import { getAudioElement } from '../AudioPlayerElement'
 
 export type CurrentTimeStateType = number
 
 export const currentTimeGlobalState = createState<CurrentTimeStateType>(0)
-DevTools(currentTimeGlobalState).label('CurrentTime')
 
 export const useCurrentTimeState = () => {
   return useState(currentTimeGlobalState)

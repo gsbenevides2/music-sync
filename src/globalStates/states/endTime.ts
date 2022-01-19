@@ -1,14 +1,12 @@
 import React from 'react'
 
-import { createState, useState, DevTools } from '@hookstate/core'
+import { createState, useState } from '@hookstate/core'
 
 import { getAudioElement } from '../AudioPlayerElement'
 
 export type EndTimeStateType = number
 
 export const endTimeGlobalState = createState<EndTimeStateType>(0)
-
-DevTools(endTimeGlobalState).label('EndTime')
 
 export const useEndTimeState = () => {
   return useState(endTimeGlobalState)

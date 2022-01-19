@@ -62,7 +62,7 @@ export const ReproductionMusicList: React.FC<Props> = ({ playerHeight }) => {
       }}
       onClick={musicId => {
         const music = musicListState.get().find(music => music.id === musicId)
-        if (music) actualMusicState.set(music)
+        if (music) actualMusicState.set(JSON.parse(JSON.stringify(music)))
       }}
     />
   )

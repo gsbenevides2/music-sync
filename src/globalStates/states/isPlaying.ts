@@ -1,14 +1,12 @@
 import React from 'react'
 
-import { createState, useState, DevTools } from '@hookstate/core'
+import { createState, useState } from '@hookstate/core'
 
 import { getAudioElement } from '../AudioPlayerElement'
 
 export type IsPlayingStateType = boolean
 
 export const isPlayingGlobalState = createState<IsPlayingStateType>(false)
-
-DevTools(isPlayingGlobalState).label('IsPlaying')
 
 export const useIsPlayingState = () => {
   return useState(isPlayingGlobalState)
