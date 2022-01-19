@@ -1,11 +1,11 @@
 import React from 'react'
 import { Range, getTrackBackground } from 'react-range'
 
+import { useCurrentTimeState } from '../../globalStates/states/currentTime'
+import { useEndTimeState } from '../../globalStates/states/endTime'
+import { useWaitingState } from '../../globalStates/states/waiting'
+
 interface Props {
-  position: number
-  end: number
-  setPosition: (position: number) => void
-  disabled: boolean
   thumbColor: string
   playedColor: string
 }
@@ -20,20 +20,18 @@ function formatSeccounds(seccounds: number) {
   return `${minutes}:${restSeccounds}`
 }
 
-const DurationBar: React.FC<Props> = ({
-  position,
-  end,
-  setPosition,
-  disabled,
-  playedColor,
-  thumbColor
-}) => {
+const DurationBar: React.FC<Props> = ({ playedColor, thumbColor }) => {
+  const currentTimeState = useCurrentTimeState()
+  const endTimeState = useEndTimeState()
+  const waitingState = useWaitingState()
+  const disabled = waitingState.get()
+  const end = endTimeState.get()
   const [values, setValues] = React.useState([0])
   const [block, setBlock] = React.useState(false)
 
   React.useEffect(() => {
-    if (!block) setValues([position])
-  }, [position, block])
+    if (!block) setValues([currentTimeState.get()])
+  }, [currentTimeState.value, block])
 
   if (end === 0) {
     return (
@@ -52,7 +50,7 @@ const DurationBar: React.FC<Props> = ({
           onFinalChange={v => {
             setBlock(false)
             setValues(v)
-            setPosition(v[0])
+            currentTimeState.set(v[0])
           }}
           min={0}
           max={end}

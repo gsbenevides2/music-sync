@@ -11,8 +11,8 @@ import { OfflineScreen } from '../../components/ScreenMessager/OfflineScreen'
 import { ServerErrorScreen } from '../../components/ScreenMessager/ServerErrorScreen'
 import { useMessage } from '../../contexts/Message/index.'
 import { useModal } from '../../contexts/Modal'
-import { MusicListContext } from '../../contexts/MusicList'
-import { PlayerContext } from '../../contexts/Player'
+import { useActualMusicState } from '../../globalStates/states/actualMusic'
+import { useMusicListState } from '../../globalStates/states/musicList'
 import api from '../../services/api/api'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
 import { FetchMusics } from '../../services/api/fetchs/musics'
@@ -37,8 +37,8 @@ export const PlaylistScreen: React.FC = () => {
   })
   const [playlistName, setPlaylistName] = React.useState<string>()
   const [pageState, setPageState] = React.useState<PageState>('Loading')
-  const playerContext = React.useContext(PlayerContext)
-  const musicListContext = React.useContext(MusicListContext)
+  const actualMusicState = useActualMusicState()
+  const musicListState = useMusicListState()
   const { id } = useParams<Params>()
   const showMessage = useMessage()
   const modal = useModal()
@@ -77,7 +77,7 @@ export const PlaylistScreen: React.FC = () => {
         }
 
         if (navigator.onLine) {
-          musicsArray.setValue(newArray)
+          musicsArray.set(newArray)
           api
             .post(`/playlist/${id}/${from}/rearrange`, {
               newPosition: toItemPosition
@@ -155,9 +155,9 @@ export const PlaylistScreen: React.FC = () => {
   const musicCallback = React.useCallback(
     (id: string) => {
       const music = musicsArray.value.find(music => music.id === id)
-      if (!music || !playerContext) return
-      playerContext.playMusic(music)
-      musicListContext?.setValue(musicsArray.value)
+      if (!music) return
+      actualMusicState.set(music)
+      musicListState.set(musicsArray.value)
     },
     [musicsArray.value]
   )

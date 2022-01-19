@@ -1,37 +1,26 @@
 import React from 'react'
-import {
-  // MdPlayArrow,
-  MdSkipNext,
-  MdSkipPrevious // MdArrowDropDown,
-} from 'react-icons/md'
 import { usePalette } from 'react-palette'
 import { useSpring, animated as Animated } from 'react-spring'
 
-import { MusicListContext } from '../../contexts/MusicList'
-import { PlayerContext } from '../../contexts/Player'
+import { useActualMusicState } from '../../globalStates/states/actualMusic'
 import { setAppColor } from '../../utils/colorsTools/setAppColor'
-import CircleButton from '../CircleButton'
-import { ImageSpecial } from '../ImageSpecial'
-import MediumList from '../MeddiumList'
-import { PlayAndPauseMemoButton } from './playAndPauseButton'
+import { ControlsButtons } from './controlsButtons'
+import { MusicInfo } from './musicInfo'
+import { ReproductionMusicList } from './musicList'
 import { DurationBarMemo } from './progress'
 import { TooglePlaylistMemoButton } from './tooglePlaylistButton'
 import { VolumeBarMemo } from './volume'
 
 const Player: React.FC = () => {
-  const playerContext = React.useContext(PlayerContext)
-  const musicListContext = React.useContext(MusicListContext)
-  if (playerContext === null || musicListContext === null) return <></>
-  const vibrantColors = usePalette(
-    `${playerContext.actualMusic?.album.spotifyCoverUrl}`
-  )
+  const actualMusicState = useActualMusicState()
+  const actualMusic = actualMusicState.get()
+  const vibrantColors = usePalette(`${actualMusic?.album.spotifyCoverUrl}`)
 
   const [isOpenPlaylist, setIsOpenPlaylist] = React.useState(false)
   const [
     stylesOfAnimationToOpenAndClosePlayer,
     animationApiToOpenAndClosePlayer
   ] = useSpring(() => ({ height: '24px', backgroundColor: 'rgb(79, 70, 229)' }))
-  const [, setPercentage] = React.useState('0px')
 
   const [playerHeight, setPlayerHeight] = React.useState(0)
 
@@ -50,25 +39,20 @@ const Player: React.FC = () => {
     })
   }, [])
 
-  React.useEffect(() => {
-    const percentage =
-      (window.innerWidth * playerContext.currentTime) / playerContext.duration
-    setPercentage(`${percentage}px`)
-  }, [playerContext.currentTime, playerContext.duration])
 
   React.useEffect(() => {
     if (isOpenPlaylist) {
       animationApiToOpenAndClosePlayer.start({
         height: `${window.innerHeight}px`
       })
-    } else if (playerContext.actualMusic) {
+    } else if (actualMusic) {
       const r = document.querySelector(':root') as any
       r.style.setProperty(`--player-height`, `${playerHeight}px`)
       animationApiToOpenAndClosePlayer.start({
         height: `${playerHeight}px`
       })
     }
-  }, [isOpenPlaylist, playerHeight, playerContext.actualMusic])
+  }, [isOpenPlaylist, playerHeight, actualMusic])
 
   React.useEffect(() => {
     if (
@@ -83,113 +67,55 @@ const Player: React.FC = () => {
     }
   }, [vibrantColors])
 
-  const handleDragInList = React.useCallback(
-    (from: string, to: string) => {
-      const fromItemPosition = musicListContext.value.findIndex(
-        value => value.id === from
-      )
-      const toItemPosition = musicListContext.value.findIndex(
-        value => value.id === to
-      )
-      if (fromItemPosition === toItemPosition) return
-      // const toItem = musicsArray.value[toItemPosition]
-      const fromItem = musicListContext.value[fromItemPosition]
-
-      if (fromItemPosition !== toItemPosition) {
-        if (fromItemPosition < toItemPosition) {
-          const part1 = musicListContext.value.slice(0, fromItemPosition)
-          const part2 = musicListContext.value.slice(
-            fromItemPosition + 1,
-            toItemPosition + 1
-          )
-          const part3 = musicListContext.value.slice(toItemPosition + 1)
-          musicListContext.setValue([...part1, ...part2, fromItem, ...part3])
-        } else if (fromItemPosition > toItemPosition) {
-          const part1 = musicListContext.value.slice(0, toItemPosition)
-          const part2 = musicListContext.value.slice(
-            toItemPosition,
-            fromItemPosition
-          )
-          const part3 = musicListContext.value.slice(fromItemPosition + 1)
-          musicListContext.setValue([...part1, fromItem, ...part2, ...part3])
-        }
-      }
-    },
-    [musicListContext.value]
-  )
-
   return (
     <Animated.div
       style={stylesOfAnimationToOpenAndClosePlayer}
       className="text-white fixed w-screen -bottom-0 left-0 z-30"
     >
-      {playerContext.actualMusic ? (
+      {actualMusic ? (
         <>
           <div
-            className="bottombar  px-4 "
+            className="bottombar px-4 "
             style={{ height: playerHeight, minHeight: '73.64px' }}
           >
             <DurationBarMemo
               playedColor={vibrantColors.data.lightVibrant || 'blue'}
               thumbColor={vibrantColors.data.vibrant || 'darkblue'}
-              disabled={playerContext.waiting}
-              setPosition={playerContext.setPosition}
-              position={playerContext.currentTime}
-              end={playerContext.duration}
             />
             <div className="flex justify-between items-center gap-1">
-              <div className="playerButtons flex">
-                <CircleButton onClick={playerContext.previousMusic}>
-                  <MdSkipPrevious />
-                </CircleButton>
-                <PlayAndPauseMemoButton
-                  onClick={playerContext.playOrPause}
-                  playing={playerContext.playing}
-                  disabled={playerContext.waiting}
-                />
-                <CircleButton>
-                  <MdSkipNext onClick={playerContext.nextMusic} />
-                </CircleButton>
-              </div>
-              <div className="musicInfo flex">
-                <ImageSpecial
-                  src={playerContext.actualMusic?.album.spotifyCoverUrl}
-                  style={{ height: playerHeight - 28 }}
-                />
-                <div
-                  className="musicData ml-1 grid"
-                  style={{ height: playerHeight - 28 }}
-                >
-                  <p className="overflow-hidden">
-                    {playerContext.actualMusic?.name ||
-                      'Não está tocando nada!'}
-                  </p>
-                  <p className="text-sm truncate">
-                    {playerContext.actualMusic?.artist.name || ''}
-                  </p>
-                </div>
-              </div>
-              <div className="musicList flex">
-                <TooglePlaylistMemoButton
-                  onClick={tooglePlaylist}
-                  opened={isOpenPlaylist}
-                />
-              </div>
+              <ControlsButtons />
+              <MusicInfo
+                playerHeight={playerHeight}
+                actualMusic={actualMusic}
+              />
+              <TooglePlaylistMemoButton
+                onClick={tooglePlaylist}
+                opened={isOpenPlaylist}
+              />
             </div>
           </div>
           <div className="flex justify-center">
-            <div className=" px-4  max-w-sm w-full items-center">
+            <div className="px-4  max-w-sm w-full items-center">
               <VolumeBarMemo
-                end={1}
-                position={playerContext.volume}
                 playedColor={vibrantColors.data.lightVibrant || 'blue'}
                 thumbColor={vibrantColors.data.vibrant || 'darkblue'}
-                setPosition={playerContext.volumeChange}
               />
             </div>
           </div>
           <h2 className="p-2">Lista de Reprodução Atual:</h2>
-          <MediumList
+          <ReproductionMusicList playerHeight={playerHeight} />
+        </>
+      ) : (
+        <p className="w-full text-center">Não está tocando nada!</p>
+      )}
+    </Animated.div>
+  )
+}
+
+export default Player
+/*
+
+ <MediumList
             listOfItems={musicListContext.value.map(music => {
               return {
                 id: music.id,
@@ -210,15 +136,15 @@ const Player: React.FC = () => {
               if (music) playerContext.playMusic(music)
             }}
           />
-        </>
-      ) : (
-        <p className="w-full text-center">Não está tocando nada!</p>
-      )}
-    </Animated.div>
-  )
-}
 
-export default Player
+  <VolumeBarMemo
+                end={1}
+                position={playerContext.volume}
+                playedColor={vibrantColors.data.lightVibrant || 'blue'}
+                thumbColor={vibrantColors.data.vibrant || 'darkblue'}
+                setPosition={playerContext.volumeChange}
+              />
+*/
 
 /*
     <div className="grid px-4 grid-cols-7 max-w-sm items-center">

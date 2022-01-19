@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@hookstate/core": "^3.0.13",
+    "@hookstate/devtools": "^3.0.1",
+    "@hookstate/persistence": "^3.0.0",
     "@react-spring/web": "^9.3.0",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
@@ -15,7 +18,6 @@
     "jsstore": "^4.3.7",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-draggable-list": "^4.0.4",
     "react-helmet": "^6.1.0",
     "react-icons": "^4.3.1",
     "react-palette": "^1.0.2",

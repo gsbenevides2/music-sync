@@ -17,7 +17,6 @@ export const ImageSpecial: React.FC<
   const imageRef = React.createRef<HTMLImageElement>()
 
   const onError = React.useCallback(() => {
-    console.log(url, props.src)
     if (url === props.src) {
       setUrl(`http://localhost:4499/image?imageUrl=${props.src}`)
     } else if (url === `http://localhost:4499/image?imageUrl=${props.src}`) {
@@ -60,7 +59,6 @@ export const ImageSpecial: React.FC<
 
   React.useEffect(() => {
     if (imageRef.current) {
-      console.log('oi')
       const imageObserver = new IntersectionObserver(e => {
         if (e[0].isIntersecting) {
           const offline = getSetting(OFFLINE_KEY)
@@ -102,7 +100,6 @@ export const ImageSpecial: React.FC<
       loading="lazy"
       alt="Algum texto aqui."
       onError={() => {
-        console.log('oi')
         onError()
       }}
     />

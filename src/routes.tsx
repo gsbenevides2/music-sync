@@ -4,8 +4,6 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom'
 import Header from './components/Header'
 import Player from './components/Player'
 import { ModalProvider } from './contexts/Modal'
-import { MusicListContextProvider } from './contexts/MusicList'
-import { PlayerContextProvider } from './contexts/Player'
 import { AlbumScreen } from './pages/Album'
 import AlbumsScreen from './pages/Albums'
 import { ArtistScreen } from './pages/Artist'
@@ -25,15 +23,11 @@ import YoutubeCallback from './pages/YoutubeCallback'
 
 const DashboardLayout: React.FC = props => {
   return (
-    <MusicListContextProvider>
-      <PlayerContextProvider>
-        <div className="">
-          <Header title="Um Titulo" />
-          <ModalProvider>{props.children}</ModalProvider>
-          <Player />
-        </div>
-      </PlayerContextProvider>
-    </MusicListContextProvider>
+    <div className="">
+      <Header title="Um Titulo" />
+      <ModalProvider>{props.children}</ModalProvider>
+      <Player />
+    </div>
   )
 }
 

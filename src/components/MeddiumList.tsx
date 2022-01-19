@@ -41,7 +41,6 @@ const MediumList: React.FC<Props> = props => {
     <ul
       className={props.ulClassName}
       style={props.ulStyle}
-      onScroll={e => console.log('oi')}
     >
       {props.listOfItems.map(item => (
         <li

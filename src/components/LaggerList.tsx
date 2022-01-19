@@ -122,7 +122,6 @@ const LaggerList: React.FC<Props> = props => {
           onDragStart={e => handleDragStart(e, item.id)}
           onDragOver={handleDargOver}
           onDrop={e => handleDrop(e, item.id)}
-          onScroll={e => console.log(e)}
         >
           <ImageSpecial
             src={item.imageSrc}

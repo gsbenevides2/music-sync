@@ -8,7 +8,7 @@ interface Options<T> {
 
 export interface Returned<T> {
   value: T[]
-  setValue: React.Dispatch<React.SetStateAction<T[]>>
+  set: React.Dispatch<React.SetStateAction<T[]>>
   append: (appendArray: T[]) => void
   delete: (value: T) => void
 }
@@ -50,5 +50,5 @@ export function useArrayState<T>(options: Options<T>): Returned<T> {
     })
   }, [])
 
-  return { value, setValue, append, delete: deleteValue }
+  return { value, set: setValue, append, delete: deleteValue }
 }

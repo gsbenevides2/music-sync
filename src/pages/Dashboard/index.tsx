@@ -9,8 +9,8 @@ import { OfflineScreen } from '../../components/ScreenMessager/OfflineScreen'
 import { ServerErrorScreen } from '../../components/ScreenMessager/ServerErrorScreen'
 import { useMessage } from '../../contexts/Message/index.'
 import { useModal } from '../../contexts/Modal'
-import { MusicListContext } from '../../contexts/MusicList'
-import { PlayerContext } from '../../contexts/Player'
+import { useActualMusicState } from '../../globalStates/states/actualMusic'
+import { useMusicListState } from '../../globalStates/states/musicList'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
 import { FetchMusics } from '../../services/api/fetchs/musics'
 import { orderByPropety } from '../../utils/orderByProperty'
@@ -29,9 +29,8 @@ const DashboardScreen: React.FC = () => {
     equalsFunction: (a, b) => a.id === b.id
   })
   const [pageState, setPageState] = React.useState<PageState>('Loading')
-  const playerContext = React.useContext(PlayerContext)
-  const musicListContext = React.useContext(MusicListContext)
-
+  const actualMusic = useActualMusicState()
+  const musicList = useMusicListState()
   const showMessage = useMessage()
 
   React.useEffect(() => {
@@ -71,9 +70,9 @@ const DashboardScreen: React.FC = () => {
   const onClickCallback = React.useCallback(
     (id: string) => {
       const music = musicsArray.value.find(music => music.id === id)
-      if (!music || !playerContext) return
-      playerContext.playMusic(music)
-      musicListContext?.setValue(musicsArray.value)
+      if (!music) return
+      actualMusic.set(music)
+      musicList.set(musicsArray.value)
     },
     [musicsArray.value]
   )

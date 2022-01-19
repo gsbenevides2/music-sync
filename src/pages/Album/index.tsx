@@ -11,8 +11,8 @@ import { OfflineScreen } from '../../components/ScreenMessager/OfflineScreen'
 import { ServerErrorScreen } from '../../components/ScreenMessager/ServerErrorScreen'
 import { useMessage } from '../../contexts/Message/index.'
 import { useModal } from '../../contexts/Modal'
-import { MusicListContext } from '../../contexts/MusicList'
-import { PlayerContext } from '../../contexts/Player'
+import { useActualMusicState } from '../../globalStates/states/actualMusic'
+import { useMusicListState } from '../../globalStates/states/musicList'
 import { MusicWithArtistAndAlbum } from '../../services/api/apiTypes'
 import { FetchMusics } from '../../services/api/fetchs/musics'
 import { orderByPropety } from '../../utils/orderByProperty'
@@ -36,10 +36,10 @@ export const AlbumScreen: React.FC = () => {
     orderingFunction: array => orderByPropety(array, 'name'),
     equalsFunction: (a, b) => a.id === b.id
   })
+  const actualMusicState = useActualMusicState()
+  const musicListState = useMusicListState()
   const [albumName, setAlbumName] = React.useState<string>()
   const [pageState, setPageState] = React.useState<PageState>('Loading')
-  const playerContext = React.useContext(PlayerContext)
-  const musicListContext = React.useContext(MusicListContext)
   const { id } = useParams<Params>()
   const showMessage = useMessage()
   const modal = useModal()
@@ -85,9 +85,9 @@ export const AlbumScreen: React.FC = () => {
   const musicCallback = React.useCallback(
     (id: string) => {
       const music = musicsArray.value.find(music => music.id === id)
-      if (!music || !playerContext) return
-      playerContext.playMusic(music)
-      musicListContext?.setValue(musicsArray.value)
+      if (!music) return
+      actualMusicState.set(music)
+      musicListState.set(musicsArray.value)
     },
     [musicsArray.value]
   )

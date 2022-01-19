@@ -8,9 +8,11 @@ interface Props {
 }
 
 const TooglePlaylistButton: React.FC<Props> = ({ opened, onClick }) => (
-  <CircleButton onClick={onClick}>
-    {opened ? <MdArrowDropDown /> : <MdQueueMusic />}
-  </CircleButton>
+  <div className="musicList flex">
+    <CircleButton onClick={onClick}>
+      {opened ? <MdArrowDropDown /> : <MdQueueMusic />}
+    </CircleButton>
+  </div>
 )
 
 export const TooglePlaylistMemoButton = React.memo(TooglePlaylistButton)
